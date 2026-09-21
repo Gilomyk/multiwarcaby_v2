@@ -18,6 +18,7 @@
               :count="gameState.scores[1] ?? 0"
               placement="top-left"
             />
+
             <GameBoard
               ref="boardComponent"
               :board="board"
@@ -25,43 +26,49 @@
               :move-duration-ms="MOVE_ANIMATION_MS"
               @cell-click="handleCellClick"
             />
+
             <CapturedPile
               ref="playerOnePile"
               :count="gameState.scores[0] ?? 0"
               placement="bottom-right"
             />
+
+            <div class="game-side-panel">
+              <GameStatus
+                v-if="gameState.status.type === 'playing'"
+                :current-player="gameState.currentPlayer"
+                :player-count="gameState.playerCount"
+                :scores="gameState.scores"
+                :moves-used="gameState.turn.movesUsed"
+                :is-sequence-active="gameState.turn.sequencePiece !== null"
+              />
+
+              <GameResult
+                v-else
+                :winner="gameState.status.winner"
+                :player-count="gameState.playerCount"
+                :scores="gameState.scores"
+                @restart="handleRestart"
+              />
+            </div>
           </div>
 
-          <div v-if="canEndSequence || canEndTurn" class="game-controls">
-            <AppButton v-if="canEndSequence" variant="outline" @click="handleEndSequence">
-              Zakończ serię
-            </AppButton>
+          <div class="game-action-area">
+            <div class="game-controls">
+              <AppButton v-if="canEndSequence" variant="outline" @click="handleEndSequence">
+                Zakończ serię
+              </AppButton>
 
-            <AppButton v-if="canEndTurn" variant="primary" @click="handleEndTurn">
-              Zakończ turę
-            </AppButton>
+              <AppButton v-if="canEndTurn" variant="primary" @click="handleEndTurn">
+                Zakończ turę
+              </AppButton>
+            </div>
+
+            <p class="game-feedback">
+              {{ actionErrorMessage ?? '' }}
+            </p>
           </div>
-          <p v-if="actionErrorMessage" class="game-feedback">
-            {{ actionErrorMessage }}
-          </p>
         </div>
-
-        <GameStatus
-          v-if="gameState.status.type === 'playing'"
-          :current-player="gameState.currentPlayer"
-          :player-count="gameState.playerCount"
-          :scores="gameState.scores"
-          :moves-used="gameState.turn.movesUsed"
-          :is-sequence-active="gameState.turn.sequencePiece !== null"
-        />
-
-        <GameResult
-          v-else
-          :winner="gameState.status.winner"
-          :player-count="gameState.playerCount"
-          :scores="gameState.scores"
-          @restart="handleRestart"
-        />
       </div>
     </main>
 
@@ -414,9 +421,8 @@ function showActionError(error: ActionError) {
 
 .game-layout {
   display: flex;
-  align-items: flex-start;
   justify-content: center;
-  gap: var(--space-6);
+  width: 100%;
 }
 
 .game-area {
@@ -426,11 +432,20 @@ function showActionError(error: ActionError) {
   gap: var(--space-4);
 }
 
+.game-action-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 72px;
+}
+
 .game-controls {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
+  min-height: 34px;
 }
 
 @media (max-width: 900px) {
@@ -444,9 +459,23 @@ function showActionError(error: ActionError) {
   position: relative;
 }
 
+.game-side-panel {
+  position: absolute;
+  top: 0;
+  left: calc(100% + var(--space-6));
+  min-width: 180px;
+}
+
+@media (max-width: 900px) {
+  .game-side-panel {
+    position: static;
+    margin-top: var(--space-4);
+  }
+}
+
 .game-feedback {
   margin: 0;
-  min-height: 1.25rem;
+  min-height: 20px;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   text-align: center;
