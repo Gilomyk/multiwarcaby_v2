@@ -4,7 +4,7 @@
     :class="{ 'piece-wrapper--moving': moveOffset !== null }"
     :style="moveStyle"
   >
-    <PieceGraphic :color="color" :size="pieceSize" />
+    <PieceGraphic :color="color" />
   </div>
 </template>
 
@@ -22,8 +22,6 @@ const props = defineProps<{
   } | null
   moveDurationMs: number
 }>()
-
-const pieceSize = 54
 
 const moveStyle = computed(() => {
   if (props.moveOffset === null) {

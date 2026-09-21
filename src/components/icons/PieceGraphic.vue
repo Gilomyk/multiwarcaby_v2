@@ -1,27 +1,26 @@
 <template>
   <svg
-    :width="size"
-    :height="size"
-    :viewBox="`0 0 ${size} ${size}`"
+    class="piece-graphic"
+    viewBox="0 0 54 54"
     xmlns="http://www.w3.org/2000/svg"
     aria-hidden="true"
   >
     <!-- Drop shadow: tight, just below the piece -->
-    <circle :cx="cx" :cy="cy + size * 0.07" :r="size * 0.4" fill="#000" opacity="0.3" />
+    <circle :cx="cx" :cy="cy + BASE_SIZE * 0.07" :r="BASE_SIZE * 0.4" fill="#000" opacity="0.3" />
     <!-- Side edge (piece thickness) -->
-    <circle :cx="cx" :cy="cy + size * 0.03" :r="size * 0.4" :fill="palette.shadow" />
+    <circle :cx="cx" :cy="cy + BASE_SIZE * 0.03" :r="BASE_SIZE * 0.4" :fill="palette.shadow" />
     <!-- Top face -->
-    <circle :cx="cx" :cy="cy" :r="size * 0.4" :fill="palette.base" />
+    <circle :cx="cx" :cy="cy" :r="BASE_SIZE * 0.4" :fill="palette.base" />
     <!-- Inner ring -->
     <circle
       :cx="cx"
       :cy="cy"
-      :r="size * 0.27"
+      :r="BASE_SIZE * 0.27"
       :fill="palette.highlight"
       fill-opacity="0.35"
       :stroke="palette.shadow"
       stroke-opacity="0.35"
-      :stroke-width="size * 0.02"
+      :stroke-width="BASE_SIZE * 0.02"
     />
   </svg>
 </template>
@@ -30,7 +29,12 @@
 import { computed } from 'vue'
 import type { PieceColor } from '@/types/board-view'
 
-const props = withDefaults(defineProps<{ color: PieceColor; size?: number }>(), { size: 56 })
+const props = defineProps<{
+  color: PieceColor
+  size?: number
+}>()
+
+const BASE_SIZE = 54
 
 const PALETTES: Record<PieceColor, { base: string; shadow: string; highlight: string }> = {
   gold: { base: '#c4a775', shadow: '#8d7048', highlight: '#edd9a8' },
@@ -38,6 +42,15 @@ const PALETTES: Record<PieceColor, { base: string; shadow: string; highlight: st
 }
 
 const palette = computed(() => PALETTES[props.color])
-const cx = computed(() => props.size / 2)
-const cy = computed(() => props.size * 0.46)
+
+const cx = BASE_SIZE / 2
+const cy = BASE_SIZE * 0.46
 </script>
+
+<style scoped>
+.piece-graphic {
+  width: 80%;
+  height: 80%;
+  display: block;
+}
+</style>
