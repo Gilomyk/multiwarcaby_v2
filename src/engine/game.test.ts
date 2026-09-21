@@ -454,7 +454,12 @@ describe('dispatch - endTurn', () => {
   it('allows ending the turn after one move', () => {
     const board = createEmptyBoard()
 
+    // pionek używany w teście ruchu
     board[4]![4] = 'piece'
+
+    // niezależne bicie, żeby gra nie zakończyła się po turze
+    board[7]![5] = 'piece'
+    board[7]![6] = 'piece'
 
     const state = createTestState(board)
 
@@ -485,6 +490,10 @@ describe('dispatch - endTurn', () => {
     expect(result.state.turn).toEqual({
       movesUsed: 0,
       sequencePiece: null,
+    })
+
+    expect(result.state.status).toEqual({
+      type: 'playing',
     })
 
     expect(result.events).toEqual([
@@ -610,5 +619,213 @@ describe('dispatch - player order', () => {
     }
 
     expect(thirdEnd.state.currentPlayer).toBe(0)
+  })
+})
+
+describe('dispatch - game over', () => {
+  it('finishes the game when no capturing combination exists', () => {
+    const board = createEmptyBoard()
+
+    board[4]![4] = 'piece'
+
+    const state: GameState = {
+      ...createTestState(board),
+      scores: [3, 1],
+      turn: {
+        movesUsed: 1,
+        sequencePiece: null,
+      },
+    }
+
+    const result = dispatch(state, {
+      type: 'endTurn',
+    })
+
+    expect(result.ok).toBe(true)
+
+    if (!result.ok) {
+      return
+    }
+
+    expect(result.state.status).toEqual({
+      type: 'finished',
+      winner: 0,
+    })
+
+    expect(result.state.currentPlayer).toBe(1)
+
+    expect(result.state.turn).toEqual({
+      movesUsed: 0,
+      sequencePiece: null,
+    })
+
+    expect(result.events).toEqual([
+      {
+        type: 'turn-ended',
+        nextPlayer: 1,
+      },
+      {
+        type: 'game-over',
+        winner: 0,
+      },
+    ])
+  })
+
+  it('finishes the game as a draw when the highest score is tied', () => {
+    const board = createEmptyBoard()
+
+    board[4]![4] = 'piece'
+
+    const state: GameState = {
+      ...createTestState(board),
+      scores: [2, 2],
+      turn: {
+        movesUsed: 1,
+        sequencePiece: null,
+      },
+    }
+
+    const result = dispatch(state, {
+      type: 'endTurn',
+    })
+
+    expect(result.ok).toBe(true)
+
+    if (!result.ok) {
+      return
+    }
+
+    expect(result.state.status).toEqual({
+      type: 'finished',
+      winner: null,
+    })
+
+    expect(result.events).toEqual([
+      {
+        type: 'turn-ended',
+        nextPlayer: 1,
+      },
+      {
+        type: 'game-over',
+        winner: null,
+      },
+    ])
+  })
+
+  it('does not finish the game when a first move can prepare a capture', () => {
+    const board = createEmptyBoard()
+
+    board[4]![1] = 'piece'
+    board[4]![3] = 'piece'
+
+    /*
+     * Nie ma teraz bicia:
+     *
+     * P _ P
+     *
+     * Ale:
+     *
+     * (4,1) -> (4,2)
+     *
+     * daje:
+     *
+     * _ P P _
+     *
+     * i wtedy możliwe jest:
+     *
+     * (4,2) -> (4,4)
+     */
+
+    const state: GameState = {
+      ...createTestState(board),
+      turn: {
+        movesUsed: 1,
+        sequencePiece: null,
+      },
+    }
+
+    const result = dispatch(state, {
+      type: 'endTurn',
+    })
+
+    expect(result.ok).toBe(true)
+
+    if (!result.ok) {
+      return
+    }
+
+    expect(result.state.status).toEqual({
+      type: 'playing',
+    })
+
+    expect(result.state.currentPlayer).toBe(1)
+
+    expect(result.events).toEqual([
+      {
+        type: 'turn-ended',
+        nextPlayer: 1,
+      },
+    ])
+  })
+
+  it('does not finish the game when an immediate capture exists', () => {
+    const board = createEmptyBoard()
+
+    board[4]![2] = 'piece'
+    board[4]![3] = 'piece'
+
+    const state: GameState = {
+      ...createTestState(board),
+      turn: {
+        movesUsed: 1,
+        sequencePiece: null,
+      },
+    }
+
+    const result = dispatch(state, {
+      type: 'endTurn',
+    })
+
+    expect(result.ok).toBe(true)
+
+    if (!result.ok) {
+      return
+    }
+
+    expect(result.state.status).toEqual({
+      type: 'playing',
+    })
+
+    expect(result.events).toEqual([
+      {
+        type: 'turn-ended',
+        nextPlayer: 1,
+      },
+    ])
+  })
+
+  it('rejects actions after the game has finished', () => {
+    const board = createEmptyBoard()
+
+    board[4]![4] = 'piece'
+
+    const state: GameState = {
+      ...createTestState(board),
+      status: {
+        type: 'finished',
+        winner: 0,
+      },
+    }
+
+    const result = dispatch(state, {
+      type: 'move',
+      from: { row: 4, col: 4 },
+      to: { row: 4, col: 5 },
+    })
+
+    expect(result).toEqual({
+      ok: false,
+      error: 'game-finished',
+    })
   })
 })

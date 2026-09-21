@@ -41,6 +41,7 @@ export type ActionError =
   | 'invalid-move'
   | 'no-moves-left'
   | 'must-make-move'
+  | 'game-finished'
 
 export type ActionResult =
   { ok: true; state: GameState; events: GameEvent[] } | { ok: false; error: ActionError }

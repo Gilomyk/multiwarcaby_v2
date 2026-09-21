@@ -1,6 +1,7 @@
 import type { Action, ActionResult, GameEvent, GameState, PlayerIndex, Position } from './types'
 import { createInitialBoard } from './board'
 import { applyMove } from './moves'
+import { getWinner, hasCapturingCombination } from './rules'
 
 export function createInitialGameState(playerCount: 2 | 3 | 4): GameState {
   return {
@@ -19,6 +20,13 @@ export function createInitialGameState(playerCount: 2 | 3 | 4): GameState {
 }
 
 export function dispatch(state: GameState, action: Action): ActionResult {
+  if (state.status.type === 'finished') {
+    return {
+      ok: false,
+      error: 'game-finished',
+    }
+  }
+
   switch (action.type) {
     case 'move':
       return dispatchMove(state, action.from, action.to)
@@ -173,16 +181,40 @@ function finishTurn(state: GameState, previousEvents: GameEvent[] = []): ActionR
     },
   }
 
+  const turnEndedEvent: GameEvent = {
+    type: 'turn-ended',
+    nextPlayer,
+  }
+
+  if (!hasCapturingCombination(nextState.board)) {
+    const winner = getWinner(nextState.scores)
+
+    const finishedState: GameState = {
+      ...nextState,
+      status: {
+        type: 'finished',
+        winner,
+      },
+    }
+
+    return {
+      ok: true,
+      state: finishedState,
+      events: [
+        ...previousEvents,
+        turnEndedEvent,
+        {
+          type: 'game-over',
+          winner,
+        },
+      ],
+    }
+  }
+
   return {
     ok: true,
     state: nextState,
-    events: [
-      ...previousEvents,
-      {
-        type: 'turn-ended',
-        nextPlayer,
-      },
-    ],
+    events: [...previousEvents, turnEndedEvent],
   }
 }
 
