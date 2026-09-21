@@ -25,6 +25,7 @@ export interface GameState {
 
 export type Action =
   | { type: 'move'; from: Position; to: Position } // krok albo skok, silnik rozpoznaje po odległości
+  | { type: 'endSequence' }
   | { type: 'endTurn' }
 
 export type GameEvent =
@@ -34,7 +35,12 @@ export type GameEvent =
   | { type: 'game-over'; winner: PlayerIndex | null }
 
 export type ActionError =
-  'destination-occupied' | 'invalid-source' | 'invalid-destination' | 'invalid-move'
+  | 'destination-occupied'
+  | 'invalid-source'
+  | 'invalid-destination'
+  | 'invalid-move'
+  | 'no-moves-left'
+  | 'must-make-move'
 
 export type ActionResult =
   { ok: true; state: GameState; events: GameEvent[] } | { ok: false; error: ActionError }
