@@ -9,7 +9,7 @@
         {{ moveLabel }}
       </span>
 
-      <span v-if="isSequenceActive" class="game-status__sequence"> Seria bić w toku </span>
+      <span v-if="isSequenceActive" class="game-status__sequence"> Seria bić aktywna </span>
     </div>
 
     <div class="game-status__scores">
@@ -92,10 +92,16 @@ const moveLabel = computed(() => {
 }
 
 .game-status__sequence {
+  align-self: flex-start;
   margin-top: var(--space-1);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+
   font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-btn-primary);
+  font-weight: 600;
+
+  color: #1c1a2e;
+  background: var(--color-piece-gold-highlight);
 }
 
 .game-status__score {

@@ -32,25 +32,6 @@
               :count="gameState.scores[0] ?? 0"
               placement="bottom-right"
             />
-
-            <div class="game-side-panel">
-              <GameStatus
-                v-if="gameState.status.type === 'playing'"
-                :current-player="gameState.currentPlayer"
-                :player-count="gameState.playerCount"
-                :scores="gameState.scores"
-                :moves-used="gameState.turn.movesUsed"
-                :is-sequence-active="gameState.turn.sequencePiece !== null"
-              />
-
-              <GameResult
-                v-else
-                :winner="gameState.status.winner"
-                :player-count="gameState.playerCount"
-                :scores="gameState.scores"
-                @restart="handleRestart"
-              />
-            </div>
           </div>
 
           <div class="game-action-area">
@@ -67,6 +48,25 @@
             <p class="game-feedback">
               {{ actionErrorMessage ?? '' }}
             </p>
+          </div>
+
+          <div class="game-side-panel">
+            <GameStatus
+              v-if="gameState.status.type === 'playing'"
+              :current-player="gameState.currentPlayer"
+              :player-count="gameState.playerCount"
+              :scores="gameState.scores"
+              :moves-used="gameState.turn.movesUsed"
+              :is-sequence-active="gameState.turn.sequencePiece !== null"
+            />
+
+            <GameResult
+              v-else
+              :winner="gameState.status.winner"
+              :player-count="gameState.playerCount"
+              :scores="gameState.scores"
+              @restart="handleRestart"
+            />
           </div>
         </div>
       </div>
@@ -426,6 +426,7 @@ function showActionError(error: ActionError) {
 }
 
 .game-area {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -469,7 +470,6 @@ function showActionError(error: ActionError) {
 @media (max-width: 900px) {
   .game-side-panel {
     position: static;
-    margin-top: var(--space-4);
   }
 }
 
