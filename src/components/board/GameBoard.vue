@@ -89,4 +89,16 @@ defineExpose({
   width: min(72vmin, 620px);
   height: min(72vmin, 620px);
 }
+
+@media (max-width: 900px) {
+  .game-board {
+    width: min(88vw, 52dvh);
+    height: min(88vw, 52dvh);
+  }
+
+  .game-board-wrapper {
+    padding: 5px;
+    border-width: 2px;
+  }
+}
 </style>

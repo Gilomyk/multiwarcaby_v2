@@ -449,13 +449,6 @@ function showActionError(error: ActionError) {
   min-height: 34px;
 }
 
-@media (max-width: 900px) {
-  .game-layout {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
 .board-stage {
   position: relative;
 }
@@ -465,12 +458,6 @@ function showActionError(error: ActionError) {
   top: 0;
   left: calc(100% + var(--space-6));
   min-width: 180px;
-}
-
-@media (max-width: 900px) {
-  .game-side-panel {
-    position: static;
-  }
 }
 
 .game-feedback {
@@ -483,6 +470,46 @@ function showActionError(error: ActionError) {
 
 .game-result {
   animation: game-result-enter 220ms ease-out;
+}
+
+@media (max-width: 900px) {
+  .game-view {
+    min-height: 100dvh;
+  }
+
+  .game-main {
+    align-items: flex-start;
+    padding: var(--space-2);
+  }
+
+  .game-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .game-area {
+    gap: var(--space-2);
+  }
+
+  .game-action-area {
+    gap: var(--space-1);
+    min-height: 48px;
+  }
+
+  .game-controls {
+    min-height: 30px;
+  }
+
+  .game-feedback {
+    min-height: 16px;
+    font-size: 0.75rem;
+  }
+
+  .game-side-panel {
+    position: static;
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 @keyframes game-result-enter {

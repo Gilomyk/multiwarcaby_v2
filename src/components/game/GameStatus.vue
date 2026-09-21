@@ -117,4 +117,39 @@ const moveLabel = computed(() => {
 .game-status__score--active {
   background: rgba(255, 255, 255, 0.08);
 }
+
+@media (max-width: 900px) {
+  .game-status {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--space-3);
+
+    width: 100%;
+    min-width: 0;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .game-status__turn,
+  .game-status__scores {
+    flex: 1;
+    min-width: 0;
+    gap: var(--space-1);
+  }
+
+  .game-status__scores {
+    border-left: 1px solid var(--color-board-border);
+    padding-left: var(--space-3);
+  }
+
+  .game-status__score {
+    padding: 2px var(--space-1);
+    gap: var(--space-2);
+  }
+
+  .game-status__sequence {
+    margin-top: 2px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+  }
+}
 </style>
