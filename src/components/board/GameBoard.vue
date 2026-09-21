@@ -1,6 +1,6 @@
 <template>
   <div class="game-board-wrapper">
-    <div class="game-board">
+    <div ref="boardElement" class="game-board">
       <template v-for="(row, rowIdx) in board" :key="rowIdx">
         <BoardCell
           v-for="(cell, colIdx) in row"
@@ -11,6 +11,8 @@
           :piece="cell.piece"
           :isSelected="cell.isSelected"
           :isTarget="cell.isTarget"
+          :move-offset="getMoveOffset(cell.row, cell.col)"
+          :move-duration-ms="props.moveDurationMs"
           @click="(r, c) => emit('cell-click', r, c)"
         />
       </template>
@@ -19,12 +21,54 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import BoardCell from '@/components/board/BoardCell.vue'
-import type { CellView } from '@/types/board-view'
+import type { CellView, PieceMoveView } from '@/types/board-view'
 
-defineProps<{ board: CellView[][] }>()
+const boardElement = ref<HTMLElement | null>(null)
 
-const emit = defineEmits<{ (e: 'cell-click', row: number, col: number): void }>()
+const props = defineProps<{
+  board: CellView[][]
+  movingPiece: PieceMoveView | null
+  moveDurationMs: number
+}>()
+
+const emit = defineEmits<{
+  (e: 'cell-click', row: number, col: number): void
+}>()
+
+function getMoveOffset(row: number, col: number): { row: number; col: number } | null {
+  const move = props.movingPiece
+
+  if (move === null || move.from.row !== row || move.from.col !== col) {
+    return null
+  }
+
+  return {
+    row: move.to.row - move.from.row,
+    col: move.to.col - move.from.col,
+  }
+}
+
+function getCellCenter(row: number, col: number) {
+  if (!boardElement.value) {
+    return null
+  }
+
+  const rect = boardElement.value.getBoundingClientRect()
+
+  const cellWidth = rect.width / 9
+  const cellHeight = rect.height / 9
+
+  return {
+    x: rect.left + (col + 0.5) * cellWidth,
+    y: rect.top + (row + 0.5) * cellHeight,
+  }
+}
+
+defineExpose({
+  getCellCenter,
+})
 </script>
 
 <style scoped>

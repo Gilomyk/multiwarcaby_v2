@@ -8,7 +8,12 @@
     ]"
     @click="emit('click', row, col)"
   >
-    <BoardPiece v-if="piece" :color="piece.color" />
+    <BoardPiece
+      v-if="piece"
+      :color="piece.color"
+      :move-offset="moveOffset"
+      :move-duration-ms="moveDurationMs"
+    />
   </div>
 </template>
 
@@ -23,9 +28,16 @@ defineProps<{
   piece: PieceView | null
   isSelected: boolean
   isTarget: boolean
+  moveOffset: {
+    row: number
+    col: number
+  } | null
+  moveDurationMs: number
 }>()
 
-const emit = defineEmits<{ (e: 'click', row: number, col: number): void }>()
+const emit = defineEmits<{
+  (e: 'click', row: number, col: number): void
+}>()
 </script>
 
 <style scoped>

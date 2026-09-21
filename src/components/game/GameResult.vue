@@ -7,7 +7,11 @@
     </strong>
 
     <div class="game-result__scores">
-      <div v-for="playerIndex in playerCount" :key="playerIndex" class="game-result__score">
+      <div
+        v-for="playerIndex in playerCount"
+        :key="playerIndex"
+        :class="['game-result__score', winner === playerIndex - 1 && 'game-result__score--winner']"
+      >
         <span>Gracz {{ playerIndex }}</span>
         <strong>{{ scores[playerIndex - 1] ?? 0 }}</strong>
       </div>
@@ -69,5 +73,10 @@ const resultLabel = computed(() =>
   justify-content: space-between;
   gap: var(--space-6);
   color: var(--color-text-light);
+}
+
+.game-result__score--winner {
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.08);
 }
 </style>

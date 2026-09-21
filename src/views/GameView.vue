@@ -1,11 +1,36 @@
 <template>
+  <FlyingCapturedPiece
+    v-if="flyingCapture"
+    :from="flyingCapture.from"
+    :to="flyingCapture.to"
+    :target-size="flyingCapture.targetSize"
+    :duration-ms="CAPTURE_ANIMATION_MS"
+  />
   <div class="game-view">
     <AppHeader />
 
     <main class="game-main">
       <div class="game-layout">
         <div class="game-area">
-          <GameBoard :board="board" @cell-click="handleCellClick" />
+          <div class="board-stage">
+            <CapturedPile
+              ref="playerTwoPile"
+              :count="gameState.scores[1] ?? 0"
+              placement="top-left"
+            />
+            <GameBoard
+              ref="boardComponent"
+              :board="board"
+              :moving-piece="movingPiece"
+              :move-duration-ms="MOVE_ANIMATION_MS"
+              @cell-click="handleCellClick"
+            />
+            <CapturedPile
+              ref="playerOnePile"
+              :count="gameState.scores[0] ?? 0"
+              placement="bottom-right"
+            />
+          </div>
 
           <div v-if="canEndSequence || canEndTurn" class="game-controls">
             <AppButton v-if="canEndSequence" variant="outline" @click="handleEndSequence">
@@ -16,6 +41,9 @@
               Zakończ turę
             </AppButton>
           </div>
+          <p v-if="actionErrorMessage" class="game-feedback">
+            {{ actionErrorMessage }}
+          </p>
         </div>
 
         <GameStatus
@@ -50,12 +78,29 @@ import GameBoard from '@/components/board/GameBoard.vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import GameStatus from '@/components/game/GameStatus.vue'
 import GameResult from '@/components/game/GameResult.vue'
+import CapturedPile from '@/components/game/CapturedPile.vue'
+import FlyingCapturedPiece from '@/components/game/FlyingCapturedPiece.vue'
 
 import { createInitialGameState, dispatch } from '@/engine/game'
 
-import type { Action, GameState, Position } from '@/engine/types'
+import type { Action, ActionError, GameState, Position, GameEvent } from '@/engine/types'
 
-import type { CellView, PieceView } from '@/types/board-view'
+import type { CellView, PieceMoveView, PieceView } from '@/types/board-view'
+
+// Types
+
+interface ScreenPoint {
+  x: number
+  y: number
+}
+
+interface FlyingCapture {
+  from: ScreenPoint
+  to: ScreenPoint
+  targetSize: number
+}
+
+// Constants
 
 const gameState = ref<GameState>(createInitialGameState(2))
 
@@ -65,19 +110,53 @@ const pieceView: PieceView = {
   color: 'gold',
 }
 
+// moving piece animation
+
+const movingPiece = ref<PieceMoveView | null>(null)
+const isAnimating = ref(false)
+
+const MOVE_ANIMATION_MS = 180
+
+// captured piece animation
+
+const boardComponent = ref<InstanceType<typeof GameBoard> | null>(null)
+
+const playerOnePile = ref<InstanceType<typeof CapturedPile> | null>(null)
+const playerTwoPile = ref<InstanceType<typeof CapturedPile> | null>(null)
+
+const flyingCapture = ref<FlyingCapture | null>(null)
+
+const hiddenCapturedPosition = ref<Position | null>(null)
+
+const CAPTURE_ANIMATION_MS = 280
+
+// Error handling
+
+const actionError = ref<ActionError | null>(null)
+
+const ERROR_MESSAGE_MS = 1400
+
 const board = computed<CellView[][]>(() =>
   gameState.value.board.map((row, rowIndex) =>
-    row.map((cell, colIndex) => ({
-      row: rowIndex,
-      col: colIndex,
-      isDark: (rowIndex + colIndex) % 2 === 1,
-      piece: cell === 'piece' ? pieceView : null,
-      isSelected: isSamePosition(selectedPosition.value, {
+    row.map((cell, colIndex) => {
+      const position: Position = {
         row: rowIndex,
         col: colIndex,
-      }),
-      isTarget: false,
-    })),
+      }
+
+      const isHiddenCapturedPiece = isSamePosition(hiddenCapturedPosition.value, position)
+
+      return {
+        row: rowIndex,
+        col: colIndex,
+        isDark: (rowIndex + colIndex) % 2 === 1,
+        piece: cell === 'piece' && !isHiddenCapturedPiece ? pieceView : null,
+
+        isSelected: isSamePosition(selectedPosition.value, position),
+
+        isTarget: false,
+      }
+    }),
   ),
 )
 
@@ -91,6 +170,34 @@ const canEndTurn = computed(
     gameState.value.turn.movesUsed === 1 &&
     gameState.value.turn.sequencePiece === null,
 )
+
+const actionErrorMessage = computed(() => {
+  switch (actionError.value) {
+    case 'destination-occupied':
+      return 'Pole docelowe jest zajęte.'
+
+    case 'invalid-source':
+      return 'Nie można wykonać ruchu z tego pola.'
+
+    case 'invalid-destination':
+      return 'Nieprawidłowe pole docelowe.'
+
+    case 'invalid-move':
+      return 'Ten ruch jest niedozwolony.'
+
+    case 'no-moves-left':
+      return 'Wykorzystano już oba ruchy.'
+
+    case 'must-make-move':
+      return 'Najpierw wykonaj co najmniej jeden ruch.'
+
+    case 'game-finished':
+      return 'Gra została już zakończona.'
+
+    default:
+      return null
+  }
+})
 
 function handleCellClick(row: number, col: number) {
   const position: Position = {
@@ -157,29 +264,77 @@ function handleEndTurn() {
   })
 }
 
-function dispatchAction(action: Action) {
+async function dispatchAction(action: Action) {
+  if (isAnimating.value) {
+    return
+  }
+
   console.log('dispatch action:', action)
 
-  const result = dispatch(gameState.value, action)
+  const stateBeforeAction = gameState.value
+
+  const result = dispatch(stateBeforeAction, action)
 
   console.log('dispatch result:', result)
 
   if (!result.ok) {
+    showActionError(result.error)
     return
   }
 
-  gameState.value = result.state
+  actionError.value = null
+
+  const moveEvent = result.events.find((event) => event.type === 'step' || event.type === 'capture')
+
+  if (!moveEvent) {
+    gameState.value = result.state
+    selectedPosition.value = result.state.turn.sequencePiece
+
+    return
+  }
+
+  isAnimating.value = true
 
   /*
-   * Engine jest źródłem prawdy również dla otwartej
-   * serii bić.
-   *
-   * - capture -> pozycja bijącego pionka
-   * - endSequence -> null
-   * - endTurn -> null
-   * - zwykły krok -> null
+   * 1. Pionek wykonujący ruch / skok.
    */
-  selectedPosition.value = result.state.turn.sequencePiece
+  movingPiece.value = {
+    from: moveEvent.from,
+    to: moveEvent.to,
+  }
+
+  await wait(MOVE_ANIMATION_MS)
+
+  /*
+   * 2. Jeśli było to bicie, zbity pionek
+   *    leci na stos gracza.
+   */
+  if (moveEvent.type === 'capture') {
+    const capturingPlayer = stateBeforeAction.currentPlayer
+
+    const nextPileSlot = stateBeforeAction.scores[capturingPlayer] ?? 0
+
+    await animateCapturedPiece(moveEvent, capturingPlayer, nextPileSlot)
+  }
+
+  /*
+   * 3. Dopiero teraz pokazujemy finalny stan engine.
+   *
+   * score zwiększa się tutaj, więc dokładnie w tym
+   * momencie pojawia się również statyczny pionek
+   * w docelowym slocie stosu.
+   */
+  gameState.value = result.state
+
+  const gameOverEvent = result.events.find((event) => event.type === 'game-over')
+
+  selectedPosition.value = gameOverEvent ? null : result.state.turn.sequencePiece
+
+  movingPiece.value = null
+  flyingCapture.value = null
+  hiddenCapturedPosition.value = null
+
+  isAnimating.value = false
 }
 
 function isSamePosition(first: Position | null, second: Position): boolean {
@@ -190,6 +345,55 @@ function handleRestart() {
   gameState.value = createInitialGameState(gameState.value.playerCount)
 
   selectedPosition.value = null
+}
+
+function wait(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, milliseconds)
+  })
+}
+
+async function animateCapturedPiece(
+  event: Extract<GameEvent, { type: 'capture' }>,
+  playerIndex: number,
+  slotIndex: number,
+) {
+  const source = boardComponent.value?.getCellCenter(event.over.row, event.over.col)
+
+  const pile = playerIndex === 0 ? playerOnePile.value : playerTwoPile.value
+
+  const target = pile?.getSlotTarget(slotIndex)
+
+  /*
+   * Np. responsive < 900 px:
+   * stos jest ukryty, więc po prostu pomijamy animację.
+   */
+  if (!source || !target) {
+    return
+  }
+
+  hiddenCapturedPosition.value = event.over
+
+  flyingCapture.value = {
+    from: source,
+    to: {
+      x: target.x,
+      y: target.y,
+    },
+    targetSize: target.size,
+  }
+
+  await wait(CAPTURE_ANIMATION_MS)
+}
+
+function showActionError(error: ActionError) {
+  actionError.value = error
+
+  window.setTimeout(() => {
+    if (actionError.value === error) {
+      actionError.value = null
+    }
+  }, ERROR_MESSAGE_MS)
 }
 </script>
 
@@ -233,6 +437,34 @@ function handleRestart() {
   .game-layout {
     flex-direction: column;
     align-items: center;
+  }
+}
+
+.board-stage {
+  position: relative;
+}
+
+.game-feedback {
+  margin: 0;
+  min-height: 1.25rem;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.game-result {
+  animation: game-result-enter 220ms ease-out;
+}
+
+@keyframes game-result-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 </style>
