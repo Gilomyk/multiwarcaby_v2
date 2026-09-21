@@ -1,0 +1,56 @@
+:root {
+  /* Page */
+  --color-bg: #7165a8;
+  --color-bg-dark: #5a5090;
+
+  /* Header / Footer */
+  --color-surface-dark: #1c1a2e;
+  --color-surface-dark-hover: #2a2745;
+
+  /* Board */
+  --color-cell-light: #ffffff;
+  --color-cell-dark: #1d2b6b;
+  --color-board-border: #4a5580;
+  --color-board-bg: #263070;
+
+  /* Pieces */
+  --color-piece-gold: #c4a775;
+  --color-piece-gold-shadow: #8d7048;
+  --color-piece-gold-highlight: #e8d4a8;
+  --color-piece-slate: #8fa8c8;
+  --color-piece-slate-shadow: #4a6a90;
+  --color-piece-slate-highlight: #c2d8ee;
+
+  /* Selected Cell */
+  --color-cell-selected: rgba(255, 230, 80, 0.4);
+
+  /* Text */
+  --color-text-light: #f5f3ff;
+  --color-text-muted: #a09cc0;
+  --color-text-nav: #d0cce8;
+
+  /* Buttons */
+  --color-btn-primary: #1d2b6b;
+  --color-btn-primary-hover: #263070;
+  --color-btn-outline-border: #c0b8e0;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Typography */
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
