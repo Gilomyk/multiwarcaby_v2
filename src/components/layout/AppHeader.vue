@@ -7,6 +7,8 @@
 
       <nav class="nav-links" aria-label="Main navigation">
         <a href="#" class="nav-link">Zagraj</a>
+        <button class="nav-link" type="button" @click="showRules = true">Zasady gry</button>
+
         <a href="#" class="nav-link">Ranking</a>
         <a href="#" class="nav-link">Ustawienia</a>
       </nav>
@@ -41,11 +43,16 @@
       </div>
     </div>
   </header>
+  <RulesModal v-if="showRules" @close="showRules = false" />
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import logo from '@/assets/logo.png'
 import AppButton from '@/components/ui/AppButton.vue'
+import RulesModal from '@/components/game/RulesModal.vue'
+
+const showRules = ref(false)
 </script>
 
 <style scoped>
