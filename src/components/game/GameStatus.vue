@@ -5,11 +5,17 @@
 
       <strong class="game-status__player"> Gracz {{ currentPlayer + 1 }} </strong>
 
-      <span class="game-status__move">
-        {{ moveLabel }}
-      </span>
+      <div class="game-status__move-row">
+        <span class="game-status__move">
+          {{ moveLabel }}
+        </span>
 
-      <span v-if="isSequenceActive" class="game-status__sequence"> Seria bić aktywna </span>
+        <span
+          class="game-status__sequence-indicator"
+          :class="{ 'game-status__sequence-indicator--active': isSequenceActive }"
+          :title="isSequenceActive ? 'Seria bić aktywna' : undefined"
+        />
+      </div>
     </div>
 
     <div class="game-status__scores">
@@ -91,6 +97,12 @@ const moveLabel = computed(() => {
   font-size: var(--font-size-sm);
 }
 
+.game-status__move-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .game-status__sequence {
   align-self: flex-start;
   margin-top: var(--space-1);
@@ -102,6 +114,21 @@ const moveLabel = computed(() => {
 
   color: #1c1a2e;
   background: var(--color-piece-gold-highlight);
+}
+
+.game-status__sequence-indicator {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  background: var(--color-piece-gold-highlight);
+
+  opacity: 0;
+}
+
+.game-status__sequence-indicator--active {
+  opacity: 1;
 }
 
 .game-status__score {

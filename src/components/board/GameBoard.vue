@@ -94,8 +94,8 @@ defineExpose({
 
 @media (max-width: 900px) {
   .game-board {
-    width: min(88vw, 52svh);
-    height: min(88vw, 52svh);
+    width: min(88vw, 50svh);
+    height: min(88vw, 50svh);
   }
 
   .game-board-wrapper {

@@ -40,9 +40,11 @@
           </div>
 
           <div class="game-action-area">
-            <span v-if="showTurnStartMessage" class="game-controls__message">
-              Rozpoczynasz turę!
-            </span>
+            <div class="game-action-slot">
+              <span v-if="showTurnStartMessage" class="game-controls__message">
+                Rozpoczynasz turę!
+              </span>
+            </div>
 
             <div class="game-controls">
               <AppButton v-if="canEndSequence" variant="outline" @click="handleEndSequence">
@@ -528,11 +530,18 @@ function updateGameAnnouncement(
 }
 
 .game-action-area {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 24px 34px 20px;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 72px;
+  justify-items: center;
+  gap: 2px;
+}
+
+.game-action-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
 }
 
 .game-controls {
@@ -540,7 +549,7 @@ function updateGameAnnouncement(
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
-  min-height: 34px;
+  height: 34px;
 }
 
 .board-stage {
@@ -555,8 +564,9 @@ function updateGameAnnouncement(
 }
 
 .game-feedback {
+  height: 20px;
   margin: 0;
-  min-height: 20px;
+  line-height: 20px;
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
   text-align: center;
@@ -567,24 +577,30 @@ function updateGameAnnouncement(
 }
 
 .game-announcement {
+  width: 100%;
+  height: 32px;
   margin: 0;
-  min-height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   color: #ffffff;
   font-size: 1.35rem;
   font-weight: 700;
-  text-align: center;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {
   .game-view {
-    min-height: 100dvh;
+    height: 100svh;
+    min-height: 100svh;
   }
 
   .game-main {
     align-items: flex-start;
-    padding: var(--space-2);
+    padding: 6px var(--space-2);
   }
 
   .game-layout {
@@ -593,21 +609,26 @@ function updateGameAnnouncement(
   }
 
   .game-area {
-    gap: var(--space-2);
+    gap: 4px;
   }
 
   .game-action-area {
-    gap: var(--space-1);
-    min-height: 48px;
+    grid-template-rows: 20px 30px 16px;
+    gap: 1px;
+  }
+
+  .game-action-slot {
+    height: 20px;
   }
 
   .game-controls {
-    min-height: 30px;
+    height: 30px;
   }
 
   .game-feedback {
-    min-height: 16px;
-    font-size: 0.75rem;
+    height: 16px;
+    font-size: 0.7rem;
+    line-height: 16px;
   }
 
   .game-side-panel {
@@ -617,7 +638,7 @@ function updateGameAnnouncement(
   }
 
   .game-announcement {
-    min-height: 24px;
+    height: 24px;
     font-size: 1rem;
   }
 }
