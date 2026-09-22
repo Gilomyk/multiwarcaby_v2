@@ -40,13 +40,11 @@
           </div>
 
           <div class="game-action-area">
-            <div class="game-action-slot">
+            <div class="game-controls">
               <span v-if="showTurnStartMessage" class="game-controls__message">
                 Rozpoczynasz turę!
               </span>
-            </div>
 
-            <div class="game-controls">
               <AppButton v-if="canEndSequence" variant="outline" @click="handleEndSequence">
                 Zakończ serię
               </AppButton>
@@ -531,17 +529,10 @@ function updateGameAnnouncement(
 
 .game-action-area {
   display: grid;
-  grid-template-rows: 24px 34px 20px;
+  grid-template-rows: 34px 20px;
   align-items: center;
   justify-items: center;
   gap: 2px;
-}
-
-.game-action-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
 }
 
 .game-controls {
@@ -613,12 +604,9 @@ function updateGameAnnouncement(
   }
 
   .game-action-area {
-    grid-template-rows: 20px 30px 16px;
+    grid-template-rows: 30px 16px;
     gap: 1px;
-  }
-
-  .game-action-slot {
-    height: 20px;
+    padding-top: 6px;
   }
 
   .game-controls {
@@ -627,8 +615,8 @@ function updateGameAnnouncement(
 
   .game-feedback {
     height: 16px;
-    font-size: 0.7rem;
     line-height: 16px;
+    font-size: 0.7rem;
   }
 
   .game-side-panel {
