@@ -482,31 +482,49 @@ function updateGameAnnouncement(
 
 <style scoped>
 .game-view {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+
+  height: 100vh;
+  overflow: hidden;
 }
 
 .game-main {
-  flex: 1;
+  min-height: 0;
+  min-width: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-8) var(--space-4);
+
+  padding: clamp(6px, 1.5vh, 20px) var(--space-4);
+
+  overflow: hidden;
 }
 
 .game-layout {
-  display: flex;
-  justify-content: center;
   width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 0;
 }
 
 .game-area {
   position: relative;
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-4);
+
+  gap: clamp(4px, 1vh, 16px);
+
+  max-height: 100%;
+  min-height: 0;
 }
 
 .game-action-area {

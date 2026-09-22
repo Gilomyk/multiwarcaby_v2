@@ -36,11 +36,13 @@ import AppButton from '@/components/ui/AppButton.vue'
 .header-inner {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--space-6);
-  height: 56px;
+
+  height: clamp(44px, 6vh, 56px);
+  padding: 0 clamp(12px, 2vw, 24px);
+
   display: flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: clamp(12px, 2vw, 32px);
 }
 
 .logo-link {

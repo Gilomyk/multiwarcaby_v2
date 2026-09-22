@@ -8,9 +8,11 @@
 
 <style scoped>
 .app-footer {
+  flex-shrink: 0;
   background: var(--color-surface-dark);
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding: var(--space-3) var(--space-6);
+
+  padding: clamp(6px, 1vh, 12px) clamp(12px, 2vw, 24px);
 }
 
 .footer-inner {

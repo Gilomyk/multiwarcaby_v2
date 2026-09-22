@@ -86,14 +86,16 @@ defineExpose({
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
-  width: min(72vmin, 620px);
-  height: min(72vmin, 620px);
+
+  width: min(72vw, 62vh, 620px);
+
+  height: min(72vw, 62vh, 620px);
 }
 
 @media (max-width: 900px) {
   .game-board {
-    width: min(88vw, 52dvh);
-    height: min(88vw, 52dvh);
+    width: min(88vw, 52svh);
+    height: min(88vw, 52svh);
   }
 
   .game-board-wrapper {
