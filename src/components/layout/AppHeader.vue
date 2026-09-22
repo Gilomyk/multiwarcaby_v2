@@ -13,6 +13,18 @@
         <a href="#" class="nav-link">Ustawienia</a>
       </nav>
 
+      <button
+        class="mobile-menu-button"
+        type="button"
+        aria-label="Otwórz menu"
+        :aria-expanded="showMobileMenu"
+        @click="showMobileMenu = !showMobileMenu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
       <a
         href="https://github.com/Gilomyk/multiwarcaby_v2"
         class="github-link"
@@ -42,6 +54,15 @@
         <AppButton variant="primary">Register</AppButton>
       </div>
     </div>
+    <nav v-if="showMobileMenu" class="mobile-nav" aria-label="Mobile navigation">
+      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false"> Zagraj </a>
+
+      <button class="mobile-nav__link" type="button" @click="openRules">Zasady gry</button>
+
+      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false"> Ranking </a>
+
+      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false"> Ustawienia </a>
+    </nav>
   </header>
   <RulesModal v-if="showRules" @close="showRules = false" />
 </template>
@@ -53,6 +74,12 @@ import AppButton from '@/components/ui/AppButton.vue'
 import RulesModal from '@/components/game/RulesModal.vue'
 
 const showRules = ref(false)
+const showMobileMenu = ref(false)
+
+function openRules() {
+  showMobileMenu.value = false
+  showRules.value = true
+}
 </script>
 
 <style scoped>
@@ -111,6 +138,14 @@ const showRules = ref(false)
   color: var(--color-text-light);
 }
 
+.mobile-menu-button {
+  display: none;
+}
+
+.mobile-nav {
+  display: none;
+}
+
 .github-link {
   display: flex;
   align-items: center;
@@ -144,13 +179,76 @@ const showRules = ref(false)
   flex-shrink: 0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .header-logo {
     height: 24px;
   }
 
   .nav-links {
     display: none;
+  }
+
+  .mobile-menu-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+
+    width: 34px;
+    height: 34px;
+    padding: 7px;
+
+    flex-shrink: 0;
+
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-md);
+
+    cursor: pointer;
+  }
+
+  .mobile-menu-button:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-menu-button span {
+    display: block;
+    width: 100%;
+    height: 2px;
+
+    background: var(--color-text-light);
+    border-radius: 2px;
+  }
+
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+
+    padding: 6px 12px 10px;
+
+    background: var(--color-surface-dark);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .mobile-nav__link {
+    width: 100%;
+    padding: 10px 12px;
+
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-md);
+
+    color: var(--color-text-nav);
+    font: inherit;
+    font-size: var(--font-size-sm);
+    text-align: left;
+
+    cursor: pointer;
+  }
+
+  .mobile-nav__link:hover {
+    color: var(--color-text-light);
+    background: rgba(255, 255, 255, 0.06);
   }
 }
 </style>
