@@ -12,11 +12,15 @@
     <main class="game-main">
       <div class="game-layout">
         <div class="game-area">
+          <p class="game-announcement">
+            {{ gameAnnouncement }}
+          </p>
           <div class="board-stage">
             <CapturedPile
               ref="playerTwoPile"
               :count="gameState.scores[1] ?? 0"
               placement="top-left"
+              player-label="Gracz 2."
             />
 
             <GameBoard
@@ -31,10 +35,15 @@
               ref="playerOnePile"
               :count="gameState.scores[0] ?? 0"
               placement="bottom-right"
+              player-label="Gracz 1."
             />
           </div>
 
           <div class="game-action-area">
+            <span v-if="showTurnStartMessage" class="game-controls__message">
+              Rozpoczynasz turę!
+            </span>
+
             <div class="game-controls">
               <AppButton v-if="canEndSequence" variant="outline" @click="handleEndSequence">
                 Zakończ serię
@@ -116,6 +125,8 @@ const selectedPosition = ref<Position | null>(null)
 const pieceView: PieceView = {
   color: 'gold',
 }
+
+const gameAnnouncement = ref('Gracz 1. rozpoczyna turę.')
 
 // moving piece animation
 
@@ -206,6 +217,13 @@ const actionErrorMessage = computed(() => {
   }
 })
 
+const showTurnStartMessage = computed(
+  () =>
+    gameState.value.status.type === 'playing' &&
+    gameState.value.turn.movesUsed === 0 &&
+    gameState.value.turn.sequencePiece === null,
+)
+
 function handleCellClick(row: number, col: number) {
   const position: Position = {
     row,
@@ -295,6 +313,9 @@ async function dispatchAction(action: Action) {
 
   if (!moveEvent) {
     gameState.value = result.state
+
+    updateGameAnnouncement(stateBeforeAction, result.state, result.events)
+
     selectedPosition.value = result.state.turn.sequencePiece
 
     return
@@ -332,6 +353,8 @@ async function dispatchAction(action: Action) {
    * w docelowym slocie stosu.
    */
   gameState.value = result.state
+
+  updateGameAnnouncement(stateBeforeAction, result.state, result.events)
 
   const gameOverEvent = result.events.find((event) => event.type === 'game-over')
 
@@ -401,6 +424,59 @@ function showActionError(error: ActionError) {
       actionError.value = null
     }
   }, ERROR_MESSAGE_MS)
+}
+
+function playerLabel(playerIndex: number) {
+  return `Gracz ${playerIndex + 1}.`
+}
+
+function updateGameAnnouncement(
+  stateBeforeAction: GameState,
+  nextState: GameState,
+  events: GameEvent[],
+) {
+  const gameOverEvent = events.find((event) => event.type === 'game-over')
+
+  if (gameOverEvent) {
+    gameAnnouncement.value =
+      gameOverEvent.winner === null
+        ? 'Gra zakończyła się remisem!'
+        : `${playerLabel(gameOverEvent.winner)} wygrywa!`
+
+    return
+  }
+
+  const turnEndedEvent = events.find((event) => event.type === 'turn-ended')
+
+  if (turnEndedEvent) {
+    gameAnnouncement.value = `${playerLabel(stateBeforeAction.currentPlayer)} zakończył turę.`
+
+    window.setTimeout(() => {
+      if (nextState.status.type === 'playing') {
+        gameAnnouncement.value = `${playerLabel(nextState.currentPlayer)} rozpoczyna turę.`
+      }
+    }, 900)
+
+    return
+  }
+
+  const captureEvent = events.find((event) => event.type === 'capture')
+
+  if (captureEvent && stateBeforeAction.turn.sequencePiece === null) {
+    gameAnnouncement.value = `${playerLabel(stateBeforeAction.currentPlayer)} rozpoczyna serię bić!`
+
+    return
+  }
+
+  if (
+    nextState.status.type === 'playing' &&
+    nextState.turn.movesUsed === 1 &&
+    nextState.turn.sequencePiece === null
+  ) {
+    gameAnnouncement.value = `${playerLabel(nextState.currentPlayer)} wykonuje 2. ruch.`
+
+    return
+  }
 }
 </script>
 
@@ -472,6 +548,17 @@ function showActionError(error: ActionError) {
   animation: game-result-enter 220ms ease-out;
 }
 
+.game-announcement {
+  margin: 0;
+  min-height: 32px;
+
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+}
+
 @media (max-width: 900px) {
   .game-view {
     min-height: 100dvh;
@@ -509,6 +596,11 @@ function showActionError(error: ActionError) {
     position: static;
     width: 100%;
     min-width: 0;
+  }
+
+  .game-announcement {
+    min-height: 24px;
+    font-size: 1rem;
   }
 }
 

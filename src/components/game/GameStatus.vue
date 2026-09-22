@@ -63,7 +63,7 @@ const moveLabel = computed(() => {
   flex-direction: column;
   gap: var(--space-6);
   min-width: 180px;
-  padding: var(--space-5);
+  padding: var(--space-3);
   background: var(--color-board-bg);
   border: 1px solid var(--color-board-border);
   border-radius: var(--radius-sm);

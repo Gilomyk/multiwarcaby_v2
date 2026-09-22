@@ -4,6 +4,13 @@
     :class="['captured-pile', `captured-pile--${placement}`]"
     :aria-label="`Zbite pionki: ${count}`"
   >
+    <div class="captured-pile__info">
+      <span class="captured-pile__label">
+        {{ playerLabel }}
+      </span>
+
+      <span class="captured-pile__label"> Zbite pionki: {{ count }} </span>
+    </div>
     <div
       v-for="slotIndex in SLOT_COUNT"
       :key="slotIndex - 1"
@@ -25,6 +32,7 @@ type Placement = 'top-left' | 'bottom-right'
 const props = defineProps<{
   count: number
   placement: Placement
+  playerLabel: string
 }>()
 
 const SLOT_COUNT = 80
@@ -114,6 +122,32 @@ defineExpose({
   justify-content: center;
   width: 24px;
   height: 24px;
+}
+
+.captured-pile__info {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.captured-pile__label {
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.captured-pile--top-left .captured-pile__info {
+  right: 0;
+  bottom: calc(100% + var(--space-2));
+  align-items: flex-end;
+}
+
+.captured-pile--bottom-right .captured-pile__info {
+  left: 0;
+  top: calc(100% + var(--space-2));
+  align-items: flex-start;
 }
 
 /*
