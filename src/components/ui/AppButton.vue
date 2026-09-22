@@ -5,7 +5,9 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ variant?: 'primary' | 'outline' }>()
+defineProps<{
+  variant?: 'primary' | 'secondary' | 'outline'
+}>()
 </script>
 
 <style scoped>
@@ -35,6 +37,17 @@ defineProps<{ variant?: 'primary' | 'outline' }>()
 .app-btn--primary:hover {
   background: var(--color-btn-primary-hover);
   border-color: var(--color-btn-primary-hover);
+}
+
+.app-btn--secondary {
+  background: rgba(28, 26, 46, 0.72);
+  color: var(--color-text-light);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.app-btn--secondary:hover {
+  background: rgba(28, 26, 46, 0.92);
+  border-color: rgba(255, 255, 255, 0.42);
 }
 
 .app-btn--outline {

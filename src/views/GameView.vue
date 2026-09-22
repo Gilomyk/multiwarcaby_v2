@@ -45,7 +45,7 @@
                 Rozpoczynasz turę!
               </span>
 
-              <AppButton v-if="canEndSequence" variant="outline" @click="handleEndSequence">
+              <AppButton v-if="canEndSequence" variant="secondary" @click="handleEndSequence">
                 Zakończ serię
               </AppButton>
 
