@@ -2,7 +2,7 @@
   <header class="app-header">
     <div class="header-inner">
       <a href="/" class="logo-link" aria-label="Multiwarcaby home">
-        <LogoIcon />
+        <img :src="logo" alt="Wittam" class="header-logo" />
       </a>
 
       <nav class="nav-links" aria-label="Main navigation">
@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import LogoIcon from '@/components/icons/LogoIcon.vue'
+import logo from '@/assets/logo.png'
 import AppButton from '@/components/ui/AppButton.vue'
 </script>
 
@@ -61,7 +61,7 @@ import AppButton from '@/components/ui/AppButton.vue'
   max-width: 1280px;
   margin: 0 auto;
 
-  height: clamp(44px, 6vh, 56px);
+  height: clamp(48px, 6vh, 60px);
   padding: 0 clamp(12px, 2vw, 24px);
 
   display: flex;
@@ -73,6 +73,16 @@ import AppButton from '@/components/ui/AppButton.vue'
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  max-width: 180px;
+  height: 100%;
+}
+
+.header-logo {
+  display: block;
+  height: 48px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -128,6 +138,10 @@ import AppButton from '@/components/ui/AppButton.vue'
 }
 
 @media (max-width: 600px) {
+  .header-logo {
+    height: 24px;
+  }
+
   .nav-links {
     display: none;
   }
