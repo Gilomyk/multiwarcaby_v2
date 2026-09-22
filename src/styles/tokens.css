@@ -1,39 +1,4 @@
 :root {
-  /* Page */
-  --color-bg: #7165a8;
-  --color-bg-dark: #5a5090;
-
-  /* Header / Footer */
-  --color-surface-dark: #1c1a2e;
-  --color-surface-dark-hover: #2a2745;
-
-  /* Board */
-  --color-cell-light: #ffffff;
-  --color-cell-dark: #1d2b6b;
-  --color-board-border: #4a5580;
-  --color-board-bg: #263070;
-
-  /* Pieces */
-  --color-piece-gold: #c4a775;
-  --color-piece-gold-shadow: #8d7048;
-  --color-piece-gold-highlight: #e8d4a8;
-  --color-piece-slate: #8fa8c8;
-  --color-piece-slate-shadow: #4a6a90;
-  --color-piece-slate-highlight: #c2d8ee;
-
-  /* Selected Cell */
-  --color-cell-selected: rgba(255, 230, 80, 0.4);
-
-  /* Text */
-  --color-text-light: #f5f3ff;
-  --color-text-muted: #a09cc0;
-  --color-text-nav: #d0cce8;
-
-  /* Buttons */
-  --color-btn-primary: #1d2b6b;
-  --color-btn-primary-hover: #263070;
-  --color-btn-outline-border: #c0b8e0;
-
   /* Spacing */
   --space-1: 4px;
   --space-2: 8px;
@@ -53,4 +18,118 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
+}
+
+/* Dark Mode */
+[data-theme='dark'] {
+  /* Page */
+  --color-bg: #7165a8;
+  --color-bg-dark: #5a5090;
+
+  /* Header / Footer */
+  --color-surface-dark: #1c1a2e;
+  --color-surface-dark-hover: #2a2745;
+
+  /* Board */
+  --color-cell-light: #ffffff;
+  --color-cell-dark: #1d2b6b;
+  --color-board-border: #4a5580;
+  --color-board-bg: #263070;
+
+  /* Pieces */
+  --color-piece-gold: #c4a775;
+  --color-piece-gold-shadow: #8d7048;
+  --color-piece-gold-highlight: #e8d4a8;
+
+  /* Selected Cell */
+  --color-cell-selected: rgba(255, 230, 80, 0.4);
+
+  /* Text */
+  --color-text-on-primary: #ffffff;
+  --color-text-light: #f5f3ff;
+  --color-text-muted: #a09cc0;
+  --color-text-nav: #d0cce8;
+
+  /* Primary Button */
+  --color-btn-primary: #1d2b6b;
+  --color-btn-primary-hover: #263070;
+  --color-btn-outline-border: #c0b8e0;
+
+  /* Secondary Button */
+  --color-btn-secondary: rgba(42, 39, 69, 0.85);
+  --color-btn-secondary-hover: rgba(42, 39, 69, 1);
+  --color-btn-secondary-border: rgba(255, 255, 255, 0.28);
+
+  /* Sequence Indicator */
+  --color-sequence-indicator: #e8d4a8;
+
+  /* Status */
+  --color-status-bg: #263070;
+  --color-status-text: #f5f3ff;
+  --color-status-active: rgba(255, 255, 255, 0.08);
+
+  /* Announcement */
+  --color-announcement-text: #ffffff;
+
+  /* Settings Modal */
+  --color-settings-option-bg: rgba(255, 255, 255, 0.03);
+  --color-settings-option-hover: rgba(255, 255, 255, 0.07);
+  --color-settings-option-border: rgba(255, 255, 255, 0.16);
+}
+
+/* Light Mode */
+[data-theme='light'] {
+  /* Page */
+  --color-bg: #e5e1f0;
+  --color-bg-dark: #d5cfe5;
+
+  /* Header / Footer */
+  --color-surface-dark: #f8f7fb;
+  --color-surface-dark-hover: #ece9f4;
+
+  /* Board */
+  --color-cell-light: #ffffff;
+  --color-cell-dark: #1d2b6b;
+  --color-board-border: #7d84a3;
+  --color-board-bg: #263070;
+
+  /* Pieces */
+  --color-piece-gold: #c4a775;
+  --color-piece-gold-shadow: #8d7048;
+  --color-piece-gold-highlight: #e8d4a8;
+
+  /* Selected Cell */
+  --color-cell-selected: rgba(255, 210, 40, 0.38);
+
+  /* Text */
+  --color-text-on-primary: #ffffff;
+  --color-text-light: #252136;
+  --color-text-muted: #777086;
+  --color-text-nav: #514b61;
+
+  /* Primary Button */
+  --color-btn-primary: #1d2b6b;
+  --color-btn-primary-hover: #263070;
+  --color-btn-outline-border: #8c849e;
+
+  /* Secondary Button */
+  --color-btn-secondary: #cfc8e4;
+  --color-btn-secondary-hover: #c1b8dc;
+  --color-btn-secondary-border: #a79bbf;
+
+  /* Sequence Indicator */
+  --color-sequence-indicator: #8f79c6;
+
+  /* Status */
+  --color-status-bg: #d8d3ea;
+  --color-status-text: #252136;
+  --color-status-active: rgba(38, 48, 112, 0.1);
+
+  /* Announcement */
+  --color-announcement-text: #252136;
+
+  /* Settings Modal */
+  --color-settings-option-bg: #f4f1f8;
+  --color-settings-option-hover: #e8e2f2;
+  --color-settings-option-border: #c9c1d8;
 }

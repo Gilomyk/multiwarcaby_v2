@@ -1,22 +1,26 @@
 <template>
   <header class="app-header">
     <div class="header-inner">
-      <a href="/" class="logo-link" aria-label="Multiwarcaby home">
+      <a href="/" class="logo-link" :aria-label="t.navigation.home">
         <img :src="logo" alt="Wittam" class="header-logo" />
       </a>
 
       <nav class="nav-links" aria-label="Main navigation">
-        <a href="#" class="nav-link">Zagraj</a>
-        <button class="nav-link" type="button" @click="showRules = true">Zasady gry</button>
+        <a href="#" class="nav-link">{{ t.navigation.play }}</a>
+        <button class="nav-link" type="button" @click="showRules = true">
+          {{ t.navigation.rules }}
+        </button>
 
-        <a href="#" class="nav-link">Ranking</a>
-        <a href="#" class="nav-link">Ustawienia</a>
+        <a href="#" class="nav-link">{{ t.navigation.ranking }}</a>
+        <button class="nav-link" type="button" @click="showSettings = true">
+          {{ t.navigation.settings }}
+        </button>
       </nav>
 
       <button
         class="mobile-menu-button"
         type="button"
-        aria-label="Otwórz menu"
+        :aria-label="t.navigation.openMenu"
         :aria-expanded="showMobileMenu"
         @click="showMobileMenu = !showMobileMenu"
       >
@@ -30,7 +34,7 @@
         class="github-link"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="GitHub repository"
+        :aria-label="t.navigation.github"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" class="github-icon">
           <path
@@ -50,21 +54,30 @@
       </a>
 
       <div class="auth-buttons">
-        <AppButton variant="outline">Sign in</AppButton>
-        <AppButton variant="primary">Register</AppButton>
+        <AppButton variant="outline">{{ t.navigation.signIn }}</AppButton>
+        <AppButton variant="primary">{{ t.navigation.register }}</AppButton>
       </div>
     </div>
     <nav v-if="showMobileMenu" class="mobile-nav" aria-label="Mobile navigation">
-      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false"> Zagraj </a>
+      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false">{{
+        t.navigation.play
+      }}</a>
 
-      <button class="mobile-nav__link" type="button" @click="openRules">Zasady gry</button>
+      <button class="mobile-nav__link" type="button" @click="openRules">
+        {{ t.navigation.rules }}
+      </button>
 
-      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false"> Ranking </a>
+      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false">{{
+        t.navigation.ranking
+      }}</a>
 
-      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false"> Ustawienia </a>
+      <button class="mobile-nav__link" type="button" @click="openSettings">
+        {{ t.navigation.settings }}
+      </button>
     </nav>
   </header>
   <RulesModal v-if="showRules" @close="showRules = false" />
+  <SettingsModal v-if="showSettings" @close="showSettings = false" />
 </template>
 
 <script setup lang="ts">
@@ -72,13 +85,21 @@ import { ref } from 'vue'
 import logo from '@/assets/logo.png'
 import AppButton from '@/components/ui/AppButton.vue'
 import RulesModal from '@/components/game/RulesModal.vue'
+import SettingsModal from '@/components/game/SettingsModal.vue'
+import { t } from '@/i18n/useLanguage'
 
 const showRules = ref(false)
 const showMobileMenu = ref(false)
+const showSettings = ref(false)
 
 function openRules() {
   showMobileMenu.value = false
   showRules.value = true
+}
+
+function openSettings() {
+  showMobileMenu.value = false
+  showSettings.value = true
 }
 </script>
 

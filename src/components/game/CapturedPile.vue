@@ -2,14 +2,14 @@
   <div
     ref="pileElement"
     :class="['captured-pile', `captured-pile--${placement}`]"
-    :aria-label="`Zbite pionki: ${count}`"
+    :aria-label="t.game.captured.pieces(count)"
   >
     <div class="captured-pile__info">
       <span class="captured-pile__label">
         {{ playerLabel }}
       </span>
 
-      <span class="captured-pile__label"> Zbite pionki: {{ count }} </span>
+      <span class="captured-pile__label">{{ t.game.captured.pieces(count) }}</span>
     </div>
     <div
       v-for="slotIndex in SLOT_COUNT"
@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import PieceGraphic from '@/components/icons/PieceGraphic.vue'
+import { t } from '@/i18n/useLanguage'
 
 type Placement = 'top-left' | 'bottom-right'
 

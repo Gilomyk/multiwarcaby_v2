@@ -1,6 +1,6 @@
 <template>
   <section class="game-result">
-    <span class="game-result__label"> Koniec gry </span>
+    <span class="game-result__label">{{ t.game.result.gameOver }}</span>
 
     <strong class="game-result__title">
       {{ resultLabel }}
@@ -12,18 +12,19 @@
         :key="playerIndex"
         :class="['game-result__score', winner === playerIndex - 1 && 'game-result__score--winner']"
       >
-        <span>Gracz {{ playerIndex }}</span>
+        <span>{{ t.game.player(playerIndex) }}</span>
         <strong>{{ scores[playerIndex - 1] ?? 0 }}</strong>
       </div>
     </div>
 
-    <AppButton variant="primary" @click="emit('restart')"> Nowa gra </AppButton>
+    <AppButton variant="primary" @click="emit('restart')">{{ t.game.result.newGame }}</AppButton>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppButton from '@/components/ui/AppButton.vue'
+import { t } from '@/i18n/useLanguage'
 
 const props = defineProps<{
   winner: number | null
@@ -36,7 +37,7 @@ const emit = defineEmits<{
 }>()
 
 const resultLabel = computed(() =>
-  props.winner === null ? 'Remis' : `Wygrywa Gracz ${props.winner + 1}`,
+  props.winner === null ? t.value.game.result.draw : t.value.game.result.winner(props.winner + 1),
 )
 </script>
 

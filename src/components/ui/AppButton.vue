@@ -30,7 +30,7 @@ defineProps<{
 
 .app-btn--primary {
   background: var(--color-btn-primary);
-  color: var(--color-text-light);
+  color: var(--color-text-on-primary);
   border-color: var(--color-btn-primary);
 }
 
@@ -40,14 +40,14 @@ defineProps<{
 }
 
 .app-btn--secondary {
-  background: rgba(28, 26, 46, 0.72);
+  background: var(--color-btn-secondary);
   color: var(--color-text-light);
-  border-color: rgba(255, 255, 255, 0.28);
+  border-color: var(--color-btn-secondary-border);
 }
 
 .app-btn--secondary:hover {
-  background: rgba(28, 26, 46, 0.92);
-  border-color: rgba(255, 255, 255, 0.42);
+  background: var(--color-btn-secondary-hover);
+  border-color: var(--color-btn-secondary-border);
 }
 
 .app-btn--outline {

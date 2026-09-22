@@ -1,9 +1,9 @@
 <template>
   <aside class="game-status">
     <div class="game-status__turn">
-      <span class="game-status__label"> Aktualna tura </span>
+      <span class="game-status__label">{{ t.game.status.currentTurn }}</span>
 
-      <strong class="game-status__player"> Gracz {{ currentPlayer + 1 }} </strong>
+      <strong class="game-status__player">{{ t.game.player(currentPlayer + 1) }}</strong>
 
       <div class="game-status__move-row">
         <span class="game-status__move">
@@ -13,13 +13,13 @@
         <span
           class="game-status__sequence-indicator"
           :class="{ 'game-status__sequence-indicator--active': isSequenceActive }"
-          :title="isSequenceActive ? 'Seria bić aktywna' : undefined"
+          :title="isSequenceActive ? t.game.status.captureSequenceActive : undefined"
         />
       </div>
     </div>
 
     <div class="game-status__scores">
-      <span class="game-status__label"> Wyniki </span>
+      <span class="game-status__label">{{ t.game.status.scores }}</span>
 
       <div
         v-for="playerIndex in playerCount"
@@ -29,7 +29,7 @@
           playerIndex - 1 === currentPlayer && 'game-status__score--active',
         ]"
       >
-        <span> Gracz {{ playerIndex }} </span>
+        <span>{{ t.game.player(playerIndex) }}</span>
 
         <strong>
           {{ scores[playerIndex - 1] ?? 0 }}
@@ -41,6 +41,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '@/i18n/useLanguage'
 
 const props = defineProps<{
   currentPlayer: number
@@ -52,14 +53,14 @@ const props = defineProps<{
 
 const moveLabel = computed(() => {
   if (props.isSequenceActive) {
-    return `Ruch ${props.movesUsed} / 2`
+    return t.value.game.status.move(props.movesUsed)
   }
 
   if (props.movesUsed === 0) {
-    return 'Ruch 1 / 2'
+    return t.value.game.status.move(1)
   }
 
-  return 'Ruch 2 / 2'
+  return t.value.game.status.move(2)
 })
 </script>
 
@@ -70,7 +71,7 @@ const moveLabel = computed(() => {
   gap: var(--space-6);
   min-width: 180px;
   padding: var(--space-3);
-  background: var(--color-board-bg);
+  background: var(--color-status-bg);
   border: 1px solid var(--color-board-border);
   border-radius: var(--radius-sm);
 }
@@ -88,12 +89,12 @@ const moveLabel = computed(() => {
 }
 
 .game-status__player {
-  color: var(--color-text-light);
+  color: var(--color-status-text);
   font-size: 1.1rem;
 }
 
 .game-status__move {
-  color: var(--color-text-light);
+  color: var(--color-status-text);
   font-size: var(--font-size-sm);
 }
 
@@ -122,7 +123,7 @@ const moveLabel = computed(() => {
   flex-shrink: 0;
 
   border-radius: 50%;
-  background: var(--color-piece-gold-highlight);
+  background: var(--color-sequence-indicator);
 
   opacity: 0;
 }
@@ -137,12 +138,12 @@ const moveLabel = computed(() => {
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-2);
-  color: var(--color-text-light);
+  color: var(--color-status-text);
   border-radius: var(--radius-sm);
 }
 
 .game-status__score--active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-status-active);
 }
 
 @media (max-width: 900px) {

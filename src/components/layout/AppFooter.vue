@@ -1,10 +1,14 @@
 <template>
   <footer class="app-footer">
     <div class="footer-inner">
-      <span class="footer-copy">Blablabla copyright<sup>TM</sup></span>
+      <span class="footer-copy">{{ t.footer.copyright }}<sup>TM</sup></span>
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+import { t } from '@/i18n/useLanguage'
+</script>
 
 <style scoped>
 .app-footer {

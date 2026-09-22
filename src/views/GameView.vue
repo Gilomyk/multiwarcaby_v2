@@ -20,7 +20,7 @@
               ref="playerTwoPile"
               :count="gameState.scores[1] ?? 0"
               placement="top-left"
-              player-label="Gracz 2."
+              :player-label="`${t.game.player(2)}.`"
             />
 
             <GameBoard
@@ -35,22 +35,22 @@
               ref="playerOnePile"
               :count="gameState.scores[0] ?? 0"
               placement="bottom-right"
-              player-label="Gracz 1."
+              :player-label="`${t.game.player(1)}.`"
             />
           </div>
 
           <div class="game-action-area">
             <div class="game-controls">
               <span v-if="showTurnStartMessage" class="game-controls__message">
-                Rozpoczynasz turę!
+                {{ t.game.controls.turnStarted }}
               </span>
 
               <AppButton v-if="canEndSequence" variant="secondary" @click="handleEndSequence">
-                Zakończ serię
+                {{ t.game.controls.endSequence }}
               </AppButton>
 
               <AppButton v-if="canEndTurn" variant="primary" @click="handleEndTurn">
-                Zakończ turę
+                {{ t.game.controls.endTurn }}
               </AppButton>
             </div>
 
@@ -96,6 +96,7 @@ import GameStatus from '@/components/game/GameStatus.vue'
 import GameResult from '@/components/game/GameResult.vue'
 import CapturedPile from '@/components/game/CapturedPile.vue'
 import FlyingCapturedPiece from '@/components/game/FlyingCapturedPiece.vue'
+import { t } from '@/i18n/useLanguage'
 
 import { createInitialGameState, dispatch } from '@/engine/game'
 
@@ -116,6 +117,14 @@ interface FlyingCapture {
   targetSize: number
 }
 
+type Announcement =
+  | { type: 'starts-turn'; player: number }
+  | { type: 'ends-turn'; player: number }
+  | { type: 'starts-sequence'; player: number }
+  | { type: 'second-move'; player: number }
+  | { type: 'wins'; player: number }
+  | { type: 'draw' }
+
 // Constants
 
 const gameState = ref<GameState>(createInitialGameState(2))
@@ -126,7 +135,10 @@ const pieceView: PieceView = {
   color: 'gold',
 }
 
-const gameAnnouncement = ref('Gracz 1. rozpoczyna turę.')
+const announcement = ref<Announcement>({
+  type: 'starts-turn',
+  player: 1,
+})
 
 // moving piece animation
 
@@ -192,25 +204,25 @@ const canEndTurn = computed(
 const actionErrorMessage = computed(() => {
   switch (actionError.value) {
     case 'destination-occupied':
-      return 'Pole docelowe jest zajęte.'
+      return t.value.game.feedback.destinationOccupied
 
     case 'invalid-source':
-      return 'Nie można wykonać ruchu z tego pola.'
+      return t.value.game.feedback.invalidSource
 
     case 'invalid-destination':
-      return 'Nieprawidłowe pole docelowe.'
+      return t.value.game.feedback.invalidDestination
 
     case 'invalid-move':
-      return 'Ten ruch jest niedozwolony.'
+      return t.value.game.feedback.invalidMove
 
     case 'no-moves-left':
-      return 'Wykorzystano już oba ruchy.'
+      return t.value.game.feedback.noMovesLeft
 
     case 'must-make-move':
-      return 'Najpierw wykonaj co najmniej jeden ruch.'
+      return t.value.game.feedback.mustMakeMove
 
     case 'game-finished':
-      return 'Gra została już zakończona.'
+      return t.value.game.feedback.gameFinished
 
     default:
       return null
@@ -223,6 +235,31 @@ const showTurnStartMessage = computed(
     gameState.value.turn.movesUsed === 0 &&
     gameState.value.turn.sequencePiece === null,
 )
+
+const gameAnnouncement = computed(() => {
+  switch (announcement.value.type) {
+    case 'starts-turn':
+      return t.value.game.announcement.playerStartsTurn(announcement.value.player)
+
+    case 'ends-turn':
+      return t.value.game.announcement.playerEndsTurn(announcement.value.player)
+
+    case 'starts-sequence':
+      return t.value.game.announcement.playerStartsCaptureSequence(announcement.value.player)
+
+    case 'second-move':
+      return t.value.game.announcement.playerSecondMove(announcement.value.player)
+
+    case 'wins':
+      return t.value.game.announcement.playerWins(announcement.value.player)
+
+    case 'draw':
+      return t.value.game.announcement.draw
+
+    default:
+      return ''
+  }
+})
 
 function handleCellClick(row: number, col: number) {
   const position: Position = {
@@ -426,10 +463,6 @@ function showActionError(error: ActionError) {
   }, ERROR_MESSAGE_MS)
 }
 
-function playerLabel(playerIndex: number) {
-  return `Gracz ${playerIndex + 1}.`
-}
-
 function updateGameAnnouncement(
   stateBeforeAction: GameState,
   nextState: GameState,
@@ -438,10 +471,10 @@ function updateGameAnnouncement(
   const gameOverEvent = events.find((event) => event.type === 'game-over')
 
   if (gameOverEvent) {
-    gameAnnouncement.value =
+    announcement.value =
       gameOverEvent.winner === null
-        ? 'Gra zakończyła się remisem!'
-        : `${playerLabel(gameOverEvent.winner)} wygrywa!`
+        ? { type: 'draw' }
+        : { type: 'wins', player: gameOverEvent.winner + 1 }
 
     return
   }
@@ -449,11 +482,17 @@ function updateGameAnnouncement(
   const turnEndedEvent = events.find((event) => event.type === 'turn-ended')
 
   if (turnEndedEvent) {
-    gameAnnouncement.value = `${playerLabel(stateBeforeAction.currentPlayer)} zakończył turę.`
+    announcement.value = {
+      type: 'ends-turn',
+      player: stateBeforeAction.currentPlayer + 1,
+    }
 
     window.setTimeout(() => {
       if (nextState.status.type === 'playing') {
-        gameAnnouncement.value = `${playerLabel(nextState.currentPlayer)} rozpoczyna turę.`
+        announcement.value = {
+          type: 'starts-turn',
+          player: nextState.currentPlayer + 1,
+        }
       }
     }, 900)
 
@@ -463,7 +502,10 @@ function updateGameAnnouncement(
   const captureEvent = events.find((event) => event.type === 'capture')
 
   if (captureEvent && stateBeforeAction.turn.sequencePiece === null) {
-    gameAnnouncement.value = `${playerLabel(stateBeforeAction.currentPlayer)} rozpoczyna serię bić!`
+    announcement.value = {
+      type: 'starts-sequence',
+      player: stateBeforeAction.currentPlayer + 1,
+    }
 
     return
   }
@@ -473,7 +515,10 @@ function updateGameAnnouncement(
     nextState.turn.movesUsed === 1 &&
     nextState.turn.sequencePiece === null
   ) {
-    gameAnnouncement.value = `${playerLabel(nextState.currentPlayer)} wykonuje 2. ruch.`
+    announcement.value = {
+      type: 'second-move',
+      player: nextState.currentPlayer + 1,
+    }
 
     return
   }
@@ -576,7 +621,7 @@ function updateGameAnnouncement(
   align-items: center;
   justify-content: center;
 
-  color: #ffffff;
+  color: var(--color-announcement-text);
   font-size: 1.35rem;
   font-weight: 700;
   line-height: 1.2;
