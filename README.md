@@ -28,20 +28,17 @@ Pełna i nadrzędna specyfikacja zasad znajduje się w pliku [`RULES.md`](./RULE
 
 ## ✨ Aktualne funkcje
 
-- plansza 9 × 9,
-- lokalna rozgrywka dla 2 graczy,
-- ruchy w 8 kierunkach,
-- zwykłe ruchy i bicia,
-- serie bić,
-- dwa ruchy na turę,
-- możliwość wcześniejszego zakończenia tury,
-- naliczanie punktów,
-- wykrywanie końca gry,
-- remis i zwycięstwo,
-- animacje ruchów,
-- animacje zbitych pionków,
-- stosy zbitych pionków,
+- plansza 9 × 9 ze współrzędnymi (A–I, 1–9),
+- lokalna rozgrywka dla 2 graczy (1v1),
+- tryb single player przeciwko deterministycznemu botowi:
+  - **Łatwy (`greedy-move`)** — maksymalizuje liczbę bić w pojedynczym ruchu,
+  - **Trudny (`lookahead-turn`)** — analizuje kombinacje 2 ruchów w ramach tury,
+  - wybór strony rozpoczynającej (Gracz / Bot / Losowo),
+- ruchy i bicia w 8 kierunkach, serie bić, dwa ruchy na turę oraz możliwość wcześniejszego zakończenia tury,
+- naliczanie punktów, wykrywanie końca gry, remis i zwycięstwo,
+- animacje ruchów, animacje zbitych pionków oraz stosy zbitych pionków,
 - komunikaty o aktualnym przebiegu tury,
+- dwujęzyczny interfejs (**PL / EN**) oraz motywy (**Jasny / Ciemny / System**),
 - responsywny interfejs desktop/mobile,
 - brak wymaganej rejestracji i backendu.
 
@@ -97,8 +94,11 @@ Najważniejsze katalogi:
 
 ```text
 src/
+├── bot/            # deterministyczny bot (FastBoard + strategie)
 ├── components/     # komponenty UI
+├── composables/    # stan konfiguracji gry i motywów
 ├── engine/         # logika i zasady gry
+├── i18n/           # tłumaczenia PL / EN
 ├── styles/         # globalne style i tokeny
 ├── types/          # typy widoku
 ├── views/          # główne widoki aplikacji
@@ -207,12 +207,9 @@ Aktualna wersja działa bez instalacji bezpośrednio w przeglądarce. W przyszł
 
 Przykładowe kierunki dalszego rozwoju:
 
-- dopracowanie grafiki pionków i planszy,
-- nowe oznaczenia planszy,
-- tryb ciemny,
+- bot oparty o uczenie ze wzmocnieniem (Reinforcement Learning),
 - PWA / instalacja na ekranie głównym,
 - obsługa 3–4 graczy w interfejsie,
-- tryb single player z botem,
 - multiplayer online,
 - konta użytkowników i ranking.
 
