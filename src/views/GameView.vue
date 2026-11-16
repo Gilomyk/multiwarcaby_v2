@@ -42,7 +42,7 @@
           <div class="game-action-area">
             <div class="game-controls">
               <span v-if="isBotTurn" class="game-controls__message">
-                {{ t.game.bot.thinking }}
+                {{ botThinkingLabel }}
               </span>
 
               <span v-else-if="showTurnStartMessage" class="game-controls__message">
@@ -114,6 +114,9 @@ import {
   gameSessionId,
   playerNames,
   restartCurrentGame,
+  simBotOneStrategy,
+  simBotTwoStrategy,
+  simRandomTieBreak,
 } from '@/composables/useGameConfig'
 import { t } from '@/i18n/useLanguage'
 
@@ -255,13 +258,32 @@ const showTurnStartMessage = computed(
     gameState.value.turn.sequencePiece === null,
 )
 
-const isBotTurn = computed(
-  () =>
+const isBotTurn = computed(() => {
+  if (gameState.value.status.type !== 'playing') {
+    return false
+  }
+
+  if (gameMode.value === 'simulation') {
+    return true
+  }
+
+  return (
     gameMode.value === 'bot' &&
     botPlayerIndex.value !== null &&
-    gameState.value.status.type === 'playing' &&
-    gameState.value.currentPlayer === botPlayerIndex.value,
-)
+    gameState.value.currentPlayer === botPlayerIndex.value
+  )
+})
+
+const botThinkingLabel = computed(() => {
+  if (gameMode.value === 'simulation') {
+    const activeName =
+      playerNames.value[gameState.value.currentPlayer] ??
+      t.value.game.player(gameState.value.currentPlayer + 1)
+    return t.value.game.bot.simThinking(activeName)
+  }
+
+  return t.value.game.bot.thinking
+})
 
 let botRunId = 0
 
@@ -270,39 +292,39 @@ function getAnnouncementPlayerName(playerNumber: number): string {
 }
 
 const gameAnnouncement = computed(() => {
-  const isBotMode = gameMode.value === 'bot'
+  const isNamedMode = gameMode.value !== 'pvp'
 
   switch (announcement.value.type) {
     case 'starts-turn':
-      return isBotMode
+      return isNamedMode
         ? t.value.game.announcement.byName.startsTurn(
             getAnnouncementPlayerName(announcement.value.player),
           )
         : t.value.game.announcement.playerStartsTurn(announcement.value.player)
 
     case 'ends-turn':
-      return isBotMode
+      return isNamedMode
         ? t.value.game.announcement.byName.endsTurn(
             getAnnouncementPlayerName(announcement.value.player),
           )
         : t.value.game.announcement.playerEndsTurn(announcement.value.player)
 
     case 'starts-sequence':
-      return isBotMode
+      return isNamedMode
         ? t.value.game.announcement.byName.startsCaptureSequence(
             getAnnouncementPlayerName(announcement.value.player),
           )
         : t.value.game.announcement.playerStartsCaptureSequence(announcement.value.player)
 
     case 'second-move':
-      return isBotMode
+      return isNamedMode
         ? t.value.game.announcement.byName.secondMove(
             getAnnouncementPlayerName(announcement.value.player),
           )
         : t.value.game.announcement.playerSecondMove(announcement.value.player)
 
     case 'wins':
-      return isBotMode
+      return isNamedMode
         ? t.value.game.announcement.byName.wins(
             getAnnouncementPlayerName(announcement.value.player),
           )
@@ -475,24 +497,36 @@ function handleRestart() {
 async function runBotTurn() {
   const runId = ++botRunId
 
-  await wait(350)
+  while (runId === botRunId && isBotTurn.value) {
+    await wait(350)
 
-  if (runId !== botRunId || !isBotTurn.value) {
-    return
-  }
-
-  const plan = planBotTurn(gameState.value, {
-    strategy: botStrategy.value,
-    randomTieBreak: true,
-  })
-
-  for (const action of plan.actions) {
     if (runId !== botRunId || !isBotTurn.value) {
       return
     }
 
-    await dispatchAction(action)
-    await wait(160)
+    const activeStrategy =
+      gameMode.value === 'simulation'
+        ? gameState.value.currentPlayer === 0
+          ? simBotOneStrategy.value
+          : simBotTwoStrategy.value
+        : botStrategy.value
+
+    const useRandomTieBreak =
+      gameMode.value === 'simulation' ? simRandomTieBreak.value : true
+
+    const plan = planBotTurn(gameState.value, {
+      strategy: activeStrategy,
+      randomTieBreak: useRandomTieBreak,
+    })
+
+    for (const action of plan.actions) {
+      if (runId !== botRunId || !isBotTurn.value) {
+        return
+      }
+
+      await dispatchAction(action)
+      await wait(160)
+    }
   }
 }
 

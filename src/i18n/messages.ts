@@ -44,9 +44,10 @@ export const messages = {
 
       mode: {
         title: 'Tryb gry',
-        description: 'Wybierz rozgrywkę lokalną lub pojedynek z botem.',
+        description: 'Wybierz rozgrywkę lokalną, pojedynek z botem lub symulację.',
         pvp: '2 Graczy (1v1)',
         bot: 'Gra z Botem',
+        simulation: 'Symulacja (Bot vs Bot)',
       },
 
       difficulty: {
@@ -54,6 +55,17 @@ export const messages = {
         description: 'Wybierz strategię podejmowania decyzji przez bota.',
         easy: 'Łatwy (1 ruch)',
         hard: 'Trudny (2 ruchy)',
+      },
+
+      simulation: {
+        bot1Title: 'Bot 1 (zaczyna)',
+        bot1Description: 'Wybierz strategię dla pierwszego bota.',
+        bot2Title: 'Bot 2',
+        bot2Description: 'Wybierz strategię dla drugiego bota.',
+        tieBreakTitle: 'Rozstrzyganie remisów',
+        tieBreakDescription: 'Sprawdź deterministyczność lub losuj spośród równie dobrych ruchów.',
+        deterministic: 'Deterministyczne',
+        random: 'Losowe',
       },
 
       starter: {
@@ -74,7 +86,10 @@ export const messages = {
       bot: {
         human: 'Ty',
         name: 'Bot',
+        easyShort: 'Łatwy',
+        hardShort: 'Trudny',
         thinking: 'Bot analizuje ruch...',
+        simThinking: (name: string) => `${name} analizuje ruch...`,
       },
 
       status: {
@@ -185,9 +200,10 @@ export const messages = {
 
       mode: {
         title: 'Game mode',
-        description: 'Choose a local match or play against the bot.',
+        description: 'Choose a local match, play against the bot, or run a simulation.',
         pvp: '2 Players (1v1)',
         bot: 'Play vs Bot',
+        simulation: 'Simulation (Bot vs Bot)',
       },
 
       difficulty: {
@@ -195,6 +211,17 @@ export const messages = {
         description: 'Choose the bot decision strategy.',
         easy: 'Easy (1 move)',
         hard: 'Hard (2 moves)',
+      },
+
+      simulation: {
+        bot1Title: 'Bot 1 (starts)',
+        bot1Description: 'Choose strategy for the first bot.',
+        bot2Title: 'Bot 2',
+        bot2Description: 'Choose strategy for the second bot.',
+        tieBreakTitle: 'Tie-breaking',
+        tieBreakDescription: 'Test determinism or randomize among equally good moves.',
+        deterministic: 'Deterministic',
+        random: 'Random',
       },
 
       starter: {
@@ -215,7 +242,10 @@ export const messages = {
       bot: {
         human: 'You',
         name: 'Bot',
+        easyShort: 'Easy',
+        hardShort: 'Hard',
         thinking: 'Bot is thinking...',
+        simThinking: (name: string) => `${name} is thinking...`,
       },
 
       status: {
