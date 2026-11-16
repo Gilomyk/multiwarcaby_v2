@@ -1,10 +1,12 @@
 <template>
   <section class="game-result">
-    <span class="game-result__label">{{ t.game.result.gameOver }}</span>
+    <div class="game-result__summary">
+      <span class="game-result__label">{{ t.game.result.gameOver }}</span>
 
-    <strong class="game-result__title">
-      {{ resultLabel }}
-    </strong>
+      <strong class="game-result__title">
+        {{ resultLabel }}
+      </strong>
+    </div>
 
     <div class="game-result__scores">
       <div
@@ -17,7 +19,9 @@
       </div>
     </div>
 
-    <AppButton variant="primary" @click="emit('restart')">{{ t.game.result.newGame }}</AppButton>
+    <AppButton class="game-result__restart" variant="primary" @click="emit('restart')">
+      {{ t.game.result.newGame }}
+    </AppButton>
   </section>
 </template>
 
@@ -61,6 +65,12 @@ const resultLabel = computed(() => {
   border-radius: var(--radius-sm);
 }
 
+.game-result__summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 .game-result__label {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm);
@@ -81,11 +91,55 @@ const resultLabel = computed(() => {
   display: flex;
   justify-content: space-between;
   gap: var(--space-6);
+  padding: 2px var(--space-1);
+  border-radius: var(--radius-sm);
   color: var(--color-text-light);
 }
 
 .game-result__score--winner {
   font-weight: 600;
   background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 900px) {
+  .game-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      'summary scores'
+      'restart scores';
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+
+    width: 100%;
+    min-width: 0;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .game-result__summary {
+    grid-area: summary;
+    gap: 2px;
+  }
+
+  .game-result__title {
+    font-size: 1rem;
+  }
+
+  .game-result__scores {
+    grid-area: scores;
+    gap: var(--space-1);
+    border-left: 1px solid var(--color-board-border);
+    padding-left: var(--space-3);
+  }
+
+  .game-result__score {
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+
+  .game-result__restart {
+    grid-area: restart;
+    justify-self: start;
+  }
 }
 </style>
