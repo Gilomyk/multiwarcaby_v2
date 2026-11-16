@@ -12,7 +12,7 @@
         :key="playerIndex"
         :class="['game-result__score', winner === playerIndex - 1 && 'game-result__score--winner']"
       >
-        <span>{{ t.game.player(playerIndex) }}</span>
+        <span>{{ playerNames?.[playerIndex - 1] ?? t.game.player(playerIndex) }}</span>
         <strong>{{ scores[playerIndex - 1] ?? 0 }}</strong>
       </div>
     </div>
@@ -30,15 +30,23 @@ const props = defineProps<{
   winner: number | null
   playerCount: 2 | 3 | 4
   scores: readonly number[]
+  playerNames?: readonly string[]
 }>()
 
 const emit = defineEmits<{
   (e: 'restart'): void
 }>()
 
-const resultLabel = computed(() =>
-  props.winner === null ? t.value.game.result.draw : t.value.game.result.winner(props.winner + 1),
-)
+const resultLabel = computed(() => {
+  if (props.winner === null) {
+    return t.value.game.result.draw
+  }
+
+  const winnerName = props.playerNames?.[props.winner]
+  return winnerName
+    ? t.value.game.result.winnerName(winnerName)
+    : t.value.game.result.winner(props.winner + 1)
+})
 </script>
 
 <style scoped>

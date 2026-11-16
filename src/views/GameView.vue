@@ -20,7 +20,7 @@
               ref="playerTwoPile"
               :count="gameState.scores[1] ?? 0"
               placement="top-left"
-              :player-label="`${t.game.player(2)}.`"
+              :player-label="playerNames[1] ?? `${t.game.player(2)}.`"
             />
 
             <GameBoard
@@ -35,21 +35,29 @@
               ref="playerOnePile"
               :count="gameState.scores[0] ?? 0"
               placement="bottom-right"
-              :player-label="`${t.game.player(1)}.`"
+              :player-label="playerNames[0] ?? `${t.game.player(1)}.`"
             />
           </div>
 
           <div class="game-action-area">
             <div class="game-controls">
-              <span v-if="showTurnStartMessage" class="game-controls__message">
+              <span v-if="isBotTurn" class="game-controls__message">
+                {{ t.game.bot.thinking }}
+              </span>
+
+              <span v-else-if="showTurnStartMessage" class="game-controls__message">
                 {{ t.game.controls.turnStarted }}
               </span>
 
-              <AppButton v-if="canEndSequence" variant="secondary" @click="handleEndSequence">
+              <AppButton
+                v-if="canEndSequence && !isBotTurn"
+                variant="secondary"
+                @click="handleEndSequence"
+              >
                 {{ t.game.controls.endSequence }}
               </AppButton>
 
-              <AppButton v-if="canEndTurn" variant="primary" @click="handleEndTurn">
+              <AppButton v-if="canEndTurn && !isBotTurn" variant="primary" @click="handleEndTurn">
                 {{ t.game.controls.endTurn }}
               </AppButton>
             </div>
@@ -67,6 +75,7 @@
               :scores="gameState.scores"
               :moves-used="gameState.turn.movesUsed"
               :is-sequence-active="gameState.turn.sequencePiece !== null"
+              :player-names="playerNames"
             />
 
             <GameResult
@@ -74,6 +83,7 @@
               :winner="gameState.status.winner"
               :player-count="gameState.playerCount"
               :scores="gameState.scores"
+              :player-names="playerNames"
               @restart="handleRestart"
             />
           </div>
@@ -86,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
@@ -96,6 +106,15 @@ import GameStatus from '@/components/game/GameStatus.vue'
 import GameResult from '@/components/game/GameResult.vue'
 import CapturedPile from '@/components/game/CapturedPile.vue'
 import FlyingCapturedPiece from '@/components/game/FlyingCapturedPiece.vue'
+import { planBotTurn } from '@/bot/bot'
+import {
+  botPlayerIndex,
+  botStrategy,
+  gameMode,
+  gameSessionId,
+  playerNames,
+  restartCurrentGame,
+} from '@/composables/useGameConfig'
 import { t } from '@/i18n/useLanguage'
 
 import { createInitialGameState, dispatch } from '@/engine/game'
@@ -236,22 +255,58 @@ const showTurnStartMessage = computed(
     gameState.value.turn.sequencePiece === null,
 )
 
+const isBotTurn = computed(
+  () =>
+    gameMode.value === 'bot' &&
+    botPlayerIndex.value !== null &&
+    gameState.value.status.type === 'playing' &&
+    gameState.value.currentPlayer === botPlayerIndex.value,
+)
+
+let botRunId = 0
+
+function getAnnouncementPlayerName(playerNumber: number): string {
+  return playerNames.value[playerNumber - 1] ?? t.value.game.player(playerNumber)
+}
+
 const gameAnnouncement = computed(() => {
+  const isBotMode = gameMode.value === 'bot'
+
   switch (announcement.value.type) {
     case 'starts-turn':
-      return t.value.game.announcement.playerStartsTurn(announcement.value.player)
+      return isBotMode
+        ? t.value.game.announcement.byName.startsTurn(
+            getAnnouncementPlayerName(announcement.value.player),
+          )
+        : t.value.game.announcement.playerStartsTurn(announcement.value.player)
 
     case 'ends-turn':
-      return t.value.game.announcement.playerEndsTurn(announcement.value.player)
+      return isBotMode
+        ? t.value.game.announcement.byName.endsTurn(
+            getAnnouncementPlayerName(announcement.value.player),
+          )
+        : t.value.game.announcement.playerEndsTurn(announcement.value.player)
 
     case 'starts-sequence':
-      return t.value.game.announcement.playerStartsCaptureSequence(announcement.value.player)
+      return isBotMode
+        ? t.value.game.announcement.byName.startsCaptureSequence(
+            getAnnouncementPlayerName(announcement.value.player),
+          )
+        : t.value.game.announcement.playerStartsCaptureSequence(announcement.value.player)
 
     case 'second-move':
-      return t.value.game.announcement.playerSecondMove(announcement.value.player)
+      return isBotMode
+        ? t.value.game.announcement.byName.secondMove(
+            getAnnouncementPlayerName(announcement.value.player),
+          )
+        : t.value.game.announcement.playerSecondMove(announcement.value.player)
 
     case 'wins':
-      return t.value.game.announcement.playerWins(announcement.value.player)
+      return isBotMode
+        ? t.value.game.announcement.byName.wins(
+            getAnnouncementPlayerName(announcement.value.player),
+          )
+        : t.value.game.announcement.playerWins(announcement.value.player)
 
     case 'draw':
       return t.value.game.announcement.draw
@@ -262,6 +317,9 @@ const gameAnnouncement = computed(() => {
 })
 
 function handleCellClick(row: number, col: number) {
+  if (isBotTurn.value) {
+    return
+  }
   const position: Position = {
     row,
     col,
@@ -315,12 +373,14 @@ function handleCellClick(row: number, col: number) {
 }
 
 function handleEndSequence() {
+  if (isBotTurn.value) return
   dispatchAction({
     type: 'endSequence',
   })
 }
 
 function handleEndTurn() {
+  if (isBotTurn.value) return
   dispatchAction({
     type: 'endTurn',
   })
@@ -409,10 +469,57 @@ function isSamePosition(first: Position | null, second: Position): boolean {
 }
 
 function handleRestart() {
-  gameState.value = createInitialGameState(gameState.value.playerCount)
-
-  selectedPosition.value = null
+  restartCurrentGame()
 }
+
+async function runBotTurn() {
+  const runId = ++botRunId
+
+  await wait(350)
+
+  if (runId !== botRunId || !isBotTurn.value) {
+    return
+  }
+
+  const plan = planBotTurn(gameState.value, {
+    strategy: botStrategy.value,
+    randomTieBreak: true,
+  })
+
+  for (const action of plan.actions) {
+    if (runId !== botRunId || !isBotTurn.value) {
+      return
+    }
+
+    await dispatchAction(action)
+    await wait(160)
+  }
+}
+
+watch(gameSessionId, () => {
+  botRunId++
+  gameState.value = createInitialGameState(2)
+  selectedPosition.value = null
+  actionError.value = null
+  movingPiece.value = null
+  flyingCapture.value = null
+  hiddenCapturedPosition.value = null
+  isAnimating.value = false
+  announcement.value = {
+    type: 'starts-turn',
+    player: 1,
+  }
+
+  if (isBotTurn.value) {
+    void runBotTurn()
+  }
+})
+
+watch(isBotTurn, (nowBotTurn, wasBotTurn) => {
+  if (nowBotTurn && !wasBotTurn) {
+    void runBotTurn()
+  }
+})
 
 function wait(milliseconds: number): Promise<void> {
   return new Promise((resolve) => {

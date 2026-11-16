@@ -3,7 +3,9 @@
     <div class="game-status__turn">
       <span class="game-status__label">{{ t.game.status.currentTurn }}</span>
 
-      <strong class="game-status__player">{{ t.game.player(currentPlayer + 1) }}</strong>
+      <strong class="game-status__player">{{
+        playerNames?.[currentPlayer] ?? t.game.player(currentPlayer + 1)
+      }}</strong>
 
       <div class="game-status__move-row">
         <span class="game-status__move">
@@ -29,7 +31,7 @@
           playerIndex - 1 === currentPlayer && 'game-status__score--active',
         ]"
       >
-        <span>{{ t.game.player(playerIndex) }}</span>
+        <span>{{ playerNames?.[playerIndex - 1] ?? t.game.player(playerIndex) }}</span>
 
         <strong>
           {{ scores[playerIndex - 1] ?? 0 }}
@@ -49,6 +51,7 @@ const props = defineProps<{
   scores: readonly number[]
   movesUsed: 0 | 1 | 2
   isSequenceActive: boolean
+  playerNames?: readonly string[]
 }>()
 
 const moveLabel = computed(() => {

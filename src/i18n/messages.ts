@@ -38,8 +38,44 @@ export const messages = {
       close: 'Zamknij',
     },
 
+    newGame: {
+      title: 'Nowa gra',
+      appName: 'Multiwarcaby',
+
+      mode: {
+        title: 'Tryb gry',
+        description: 'Wybierz rozgrywkę lokalną lub pojedynek z botem.',
+        pvp: '2 Graczy (1v1)',
+        bot: 'Gra z Botem',
+      },
+
+      difficulty: {
+        title: 'Poziom bota',
+        description: 'Wybierz strategię podejmowania decyzji przez bota.',
+        easy: 'Łatwy (1 ruch)',
+        hard: 'Trudny (2 ruchy)',
+      },
+
+      starter: {
+        title: 'Kto zaczyna',
+        description: 'Ustal, kto wykona pierwszy ruch w partii.',
+        human: 'Ty',
+        bot: 'Bot',
+        random: 'Losowo',
+      },
+
+      cancel: 'Anuluj',
+      start: 'Rozpocznij grę',
+    },
+
     game: {
       player: (player: number) => `Gracz ${player}`,
+
+      bot: {
+        human: 'Ty',
+        name: 'Bot',
+        thinking: 'Bot analizuje ruch...',
+      },
 
       status: {
         currentTurn: 'Aktualna tura',
@@ -64,6 +100,7 @@ export const messages = {
         gameOver: 'Koniec gry',
         draw: 'Remis',
         winner: (player: number) => `Wygrywa Gracz ${player}`,
+        winnerName: (name: string) => `Wygrywa: ${name}`,
         newGame: 'Nowa gra',
       },
 
@@ -79,6 +116,14 @@ export const messages = {
         playerWins: (player: number) => `Gracz ${player}. wygrywa!`,
 
         draw: 'Gra zakończyła się remisem!',
+
+        byName: {
+          startsTurn: (name: string) => `${name} rozpoczyna turę.`,
+          endsTurn: (name: string) => `${name} kończy turę.`,
+          startsCaptureSequence: (name: string) => `${name} rozpoczyna serię bić!`,
+          secondMove: (name: string) => `${name} wykonuje 2. ruch.`,
+          wins: (name: string) => `${name} wygrywa!`,
+        },
       },
 
       feedback: {
@@ -134,8 +179,44 @@ export const messages = {
       close: 'Close',
     },
 
+    newGame: {
+      title: 'New game',
+      appName: 'Multiwarcaby',
+
+      mode: {
+        title: 'Game mode',
+        description: 'Choose a local match or play against the bot.',
+        pvp: '2 Players (1v1)',
+        bot: 'Play vs Bot',
+      },
+
+      difficulty: {
+        title: 'Bot difficulty',
+        description: 'Choose the bot decision strategy.',
+        easy: 'Easy (1 move)',
+        hard: 'Hard (2 moves)',
+      },
+
+      starter: {
+        title: 'First move',
+        description: 'Choose who makes the opening move.',
+        human: 'You',
+        bot: 'Bot',
+        random: 'Random',
+      },
+
+      cancel: 'Cancel',
+      start: 'Start game',
+    },
+
     game: {
       player: (player: number) => `Player ${player}`,
+
+      bot: {
+        human: 'You',
+        name: 'Bot',
+        thinking: 'Bot is thinking...',
+      },
 
       status: {
         currentTurn: 'Current turn',
@@ -160,6 +241,7 @@ export const messages = {
         gameOver: 'Game over',
         draw: 'Draw',
         winner: (player: number) => `Player ${player} wins`,
+        winnerName: (name: string) => `${name} wins`,
         newGame: 'New game',
       },
 
@@ -176,6 +258,14 @@ export const messages = {
         playerWins: (player: number) => `Player ${player} wins!`,
 
         draw: 'The game ended in a draw!',
+
+        byName: {
+          startsTurn: (name: string) => `${name} starts the turn.`,
+          endsTurn: (name: string) => `${name} ends the turn.`,
+          startsCaptureSequence: (name: string) => `${name} starts a capture sequence!`,
+          secondMove: (name: string) => `${name} makes a second move.`,
+          wins: (name: string) => `${name} wins!`,
+        },
       },
 
       feedback: {

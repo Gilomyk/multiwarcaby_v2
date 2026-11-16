@@ -6,7 +6,9 @@
       </a>
 
       <nav class="nav-links" aria-label="Main navigation">
-        <a href="#" class="nav-link">{{ t.navigation.play }}</a>
+        <button class="nav-link" type="button" @click="showNewGame = true">
+          {{ t.navigation.play }}
+        </button>
         <button class="nav-link" type="button" @click="showRules = true">
           {{ t.navigation.rules }}
         </button>
@@ -59,9 +61,9 @@
       </div>
     </div>
     <nav v-if="showMobileMenu" class="mobile-nav" aria-label="Mobile navigation">
-      <a href="#" class="mobile-nav__link" @click="showMobileMenu = false">{{
-        t.navigation.play
-      }}</a>
+      <button class="mobile-nav__link" type="button" @click="openNewGame">
+        {{ t.navigation.play }}
+      </button>
 
       <button class="mobile-nav__link" type="button" @click="openRules">
         {{ t.navigation.rules }}
@@ -76,6 +78,7 @@
       </button>
     </nav>
   </header>
+  <NewGameModal v-if="showNewGame" @close="showNewGame = false" />
   <RulesModal v-if="showRules" @close="showRules = false" />
   <SettingsModal v-if="showSettings" @close="showSettings = false" />
 </template>
@@ -84,13 +87,20 @@
 import { ref } from 'vue'
 import logo from '@/assets/logo.png'
 import AppButton from '@/components/ui/AppButton.vue'
+import NewGameModal from '@/components/game/NewGameModal.vue'
 import RulesModal from '@/components/game/RulesModal.vue'
 import SettingsModal from '@/components/game/SettingsModal.vue'
 import { t } from '@/i18n/useLanguage'
 
+const showNewGame = ref(false)
 const showRules = ref(false)
 const showMobileMenu = ref(false)
 const showSettings = ref(false)
+
+function openNewGame() {
+  showMobileMenu.value = false
+  showNewGame.value = true
+}
 
 function openRules() {
   showMobileMenu.value = false
