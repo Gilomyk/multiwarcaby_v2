@@ -186,6 +186,7 @@ function handleStart() {
 
 .new-game-modal {
   width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
 
   display: flex;
   flex-direction: column;
@@ -205,6 +206,7 @@ function handleStart() {
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
+  flex-shrink: 0;
 
   padding: var(--space-4) var(--space-6);
   border-bottom: 1px solid var(--color-settings-option-border);
@@ -254,6 +256,7 @@ function handleStart() {
   flex-direction: column;
   gap: var(--space-6);
   padding: var(--space-6);
+  overflow-y: auto;
 }
 
 .new-game-section {

@@ -76,6 +76,15 @@
       <button class="mobile-nav__link" type="button" @click="openSettings">
         {{ t.navigation.settings }}
       </button>
+
+      <div class="mobile-nav__auth">
+        <AppButton variant="outline" @click="showMobileMenu = false">{{
+          t.navigation.signIn
+        }}</AppButton>
+        <AppButton variant="primary" @click="showMobileMenu = false">{{
+          t.navigation.register
+        }}</AppButton>
+      </div>
     </nav>
   </header>
   <NewGameModal v-if="showNewGame" @close="showNewGame = false" />
@@ -215,7 +224,8 @@ function openSettings() {
     height: 24px;
   }
 
-  .nav-links {
+  .nav-links,
+  .auth-buttons {
     display: none;
   }
 
@@ -227,6 +237,7 @@ function openSettings() {
 
     width: 34px;
     height: 34px;
+    margin-left: auto;
     padding: 7px;
 
     flex-shrink: 0;
@@ -252,13 +263,32 @@ function openSettings() {
   }
 
   .mobile-nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
     display: flex;
     flex-direction: column;
 
-    padding: 6px 12px 10px;
+    padding: 6px 12px 12px;
 
     background: var(--color-surface-dark);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .mobile-nav__auth {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile-nav__auth > * {
+    flex: 1;
   }
 
   .mobile-nav__link {

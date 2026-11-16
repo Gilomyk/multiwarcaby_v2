@@ -155,9 +155,15 @@ defineExpose({
  * Przy średnim desktopie zachowujemy cały stos,
  * ale wizualnie go pomniejszamy.
  */
-@media (max-width: 1200px) {
+@media (max-width: 1200px), (max-height: 760px) {
   .captured-pile {
     transform: scale(0.72);
+  }
+}
+
+@media (max-height: 680px) {
+  .captured-pile {
+    transform: scale(0.62);
   }
 }
 

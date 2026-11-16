@@ -637,8 +637,7 @@ function updateGameAnnouncement(
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
 
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100dvh;
 }
 
 .game-main {
@@ -650,8 +649,6 @@ function updateGameAnnouncement(
   justify-content: center;
 
   padding: clamp(6px, 1.5vh, 20px) var(--space-4);
-
-  overflow: hidden;
 }
 
 .game-layout {
@@ -737,8 +734,7 @@ function updateGameAnnouncement(
 
 @media (max-width: 900px) {
   .game-view {
-    height: 100svh;
-    min-height: 100svh;
+    min-height: 100dvh;
   }
 
   .game-main {
@@ -778,8 +774,11 @@ function updateGameAnnouncement(
   }
 
   .game-announcement {
-    height: 24px;
+    min-height: 24px;
+    height: auto;
     font-size: 1rem;
+    white-space: normal;
+    text-align: center;
   }
 }
 

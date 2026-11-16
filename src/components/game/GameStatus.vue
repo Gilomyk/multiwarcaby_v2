@@ -33,7 +33,8 @@
       >
         <span>{{ playerNames?.[playerIndex - 1] ?? t.game.player(playerIndex) }}</span>
 
-        <strong>
+        <strong class="game-status__score-value">
+          <span class="game-status__piece-dot" aria-hidden="true" />
           {{ scores[playerIndex - 1] ?? 0 }}
         </strong>
       </div>
@@ -94,6 +95,32 @@ const moveLabel = computed(() => {
 .game-status__player {
   color: var(--color-status-text);
   font-size: 1.1rem;
+}
+
+.game-status__score-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.game-status__piece-dot {
+  display: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--color-piece-gold-highlight),
+    var(--color-piece-gold) 65%,
+    var(--color-piece-gold-shadow)
+  );
+  border: 1px solid var(--color-piece-gold-shadow);
+}
+
+@media (max-width: 900px) {
+  .game-status__piece-dot {
+    display: inline-block;
+  }
 }
 
 .game-status__move {

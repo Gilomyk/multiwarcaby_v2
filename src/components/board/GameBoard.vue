@@ -214,8 +214,8 @@ defineExpose({
 
 @media (max-width: 900px) {
   .game-board {
-    width: min(82vw, 46svh);
-    height: min(82vw, 46svh);
+    width: min(calc(100vw - 58px), 46dvh);
+    height: min(calc(100vw - 58px), 46dvh);
   }
 
   .game-board-wrapper {
@@ -244,6 +244,28 @@ defineExpose({
   .board-ranks span,
   .board-files span {
     font-size: 0.58rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .game-board {
+    width: min(calc(100vw - 44px), 46dvh);
+    height: min(calc(100vw - 44px), 46dvh);
+  }
+
+  .game-board-wrapper {
+    padding: 4px;
+  }
+
+  .board-coordinates-layout {
+    grid-template-columns: 12px auto 12px;
+    grid-template-rows: 12px auto 12px;
+    gap: 2px;
+  }
+
+  .board-ranks span,
+  .board-files span {
+    font-size: 0.54rem;
   }
 }
 </style>

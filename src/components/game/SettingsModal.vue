@@ -131,6 +131,7 @@ const emit = defineEmits<{
 
 .settings-modal {
   width: min(560px, 100%);
+  max-height: calc(100dvh - 32px);
 
   display: flex;
   flex-direction: column;
@@ -150,6 +151,7 @@ const emit = defineEmits<{
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-shrink: 0;
 
   padding: 22px 24px 16px;
 
@@ -199,6 +201,7 @@ const emit = defineEmits<{
   gap: 26px;
 
   padding: 22px 24px;
+  overflow-y: auto;
 }
 
 .settings-section {
