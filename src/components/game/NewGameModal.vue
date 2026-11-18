@@ -33,7 +33,7 @@
             </div>
           </div>
 
-          <div class="new-game-options">
+          <div class="new-game-options new-game-options--three">
             <button
               type="button"
               class="new-game-option"
@@ -51,8 +51,112 @@
             >
               {{ t.newGame.mode.bot }}
             </button>
+
+            <button
+              type="button"
+              class="new-game-option"
+              :class="{ 'new-game-option--active': selectedMode === 'simulation' }"
+              @click="selectedMode = 'simulation'"
+            >
+              {{ t.newGame.mode.simulation }}
+            </button>
           </div>
         </section>
+
+        <template v-if="selectedMode === 'simulation'">
+          <section class="new-game-section">
+            <div class="new-game-section__heading">
+              <span class="new-game-section__icon">🤖</span>
+
+              <div>
+                <h3>{{ t.newGame.simulation.bot1Title }}</h3>
+                <p>{{ t.newGame.simulation.bot1Description }}</p>
+              </div>
+            </div>
+
+            <div class="new-game-options">
+              <button
+                type="button"
+                class="new-game-option"
+                :class="{ 'new-game-option--active': selectedSimBot1 === 'greedy-move' }"
+                @click="selectedSimBot1 = 'greedy-move'"
+              >
+                {{ t.newGame.difficulty.easy }}
+              </button>
+
+              <button
+                type="button"
+                class="new-game-option"
+                :class="{ 'new-game-option--active': selectedSimBot1 === 'lookahead-turn' }"
+                @click="selectedSimBot1 = 'lookahead-turn'"
+              >
+                {{ t.newGame.difficulty.hard }}
+              </button>
+            </div>
+          </section>
+
+          <section class="new-game-section">
+            <div class="new-game-section__heading">
+              <span class="new-game-section__icon">🤖</span>
+
+              <div>
+                <h3>{{ t.newGame.simulation.bot2Title }}</h3>
+                <p>{{ t.newGame.simulation.bot2Description }}</p>
+              </div>
+            </div>
+
+            <div class="new-game-options">
+              <button
+                type="button"
+                class="new-game-option"
+                :class="{ 'new-game-option--active': selectedSimBot2 === 'greedy-move' }"
+                @click="selectedSimBot2 = 'greedy-move'"
+              >
+                {{ t.newGame.difficulty.easy }}
+              </button>
+
+              <button
+                type="button"
+                class="new-game-option"
+                :class="{ 'new-game-option--active': selectedSimBot2 === 'lookahead-turn' }"
+                @click="selectedSimBot2 = 'lookahead-turn'"
+              >
+                {{ t.newGame.difficulty.hard }}
+              </button>
+            </div>
+          </section>
+
+          <section class="new-game-section">
+            <div class="new-game-section__heading">
+              <span class="new-game-section__icon">⚖️</span>
+
+              <div>
+                <h3>{{ t.newGame.simulation.tieBreakTitle }}</h3>
+                <p>{{ t.newGame.simulation.tieBreakDescription }}</p>
+              </div>
+            </div>
+
+            <div class="new-game-options">
+              <button
+                type="button"
+                class="new-game-option"
+                :class="{ 'new-game-option--active': !selectedSimRandomTieBreak }"
+                @click="selectedSimRandomTieBreak = false"
+              >
+                {{ t.newGame.simulation.deterministic }}
+              </button>
+
+              <button
+                type="button"
+                class="new-game-option"
+                :class="{ 'new-game-option--active': selectedSimRandomTieBreak }"
+                @click="selectedSimRandomTieBreak = true"
+              >
+                {{ t.newGame.simulation.random }}
+              </button>
+            </div>
+          </section>
+        </template>
 
         <template v-if="selectedMode === 'bot'">
           <section class="new-game-section">
@@ -144,6 +248,9 @@ import {
   botStarter,
   botStrategy,
   gameMode,
+  simBotOneStrategy,
+  simBotTwoStrategy,
+  simRandomTieBreak,
   startNewGame,
   type BotStarter,
   type GameMode,
@@ -157,12 +264,18 @@ const emit = defineEmits<{
 const selectedMode = ref<GameMode>(gameMode.value)
 const selectedStrategy = ref<BotStrategy>(botStrategy.value)
 const selectedStarter = ref<BotStarter>(botStarter.value)
+const selectedSimBot1 = ref<BotStrategy>(simBotOneStrategy.value)
+const selectedSimBot2 = ref<BotStrategy>(simBotTwoStrategy.value)
+const selectedSimRandomTieBreak = ref<boolean>(simRandomTieBreak.value)
 
 function handleStart() {
   startNewGame({
     mode: selectedMode.value,
     strategy: selectedStrategy.value,
     starter: selectedStarter.value,
+    simBot1Strategy: selectedSimBot1.value,
+    simBot2Strategy: selectedSimBot2.value,
+    simRandomTieBreak: selectedSimRandomTieBreak.value,
   })
   emit('close')
 }

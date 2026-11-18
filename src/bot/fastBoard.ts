@@ -163,21 +163,35 @@ function findLongestCaptureStepsFromPiece(
 export function findBestCaptureSequence(
   board: FastBoard,
   budget: SearchBudget = createSearchBudget(),
+  randomTieBreak = false,
 ): CaptureSequenceResult {
-  let bestSteps: CaptureStep[] = []
+  let bestLength = 0
+  let bestCandidates: CaptureStep[][] = []
 
   for (let idx = 0; idx < TOTAL_CELLS; idx++) {
     if (board[idx] !== PIECE_CELL) continue
     const candidateSteps = findLongestCaptureStepsFromPiece(board, idx, budget)
-    if (candidateSteps.length > bestSteps.length) {
-      bestSteps = candidateSteps
+
+    if (candidateSteps.length > bestLength) {
+      bestLength = candidateSteps.length
+      bestCandidates = [candidateSteps]
+    } else if (randomTieBreak && candidateSteps.length > 0 && candidateSteps.length === bestLength) {
+      bestCandidates.push(candidateSteps)
     }
+
     if (budget.timedOut) break
   }
 
+  const chosenSteps =
+    bestCandidates.length === 0
+      ? []
+      : randomTieBreak && bestCandidates.length > 1
+        ? bestCandidates[Math.floor(Math.random() * bestCandidates.length)]!
+        : bestCandidates[0]!
+
   return {
-    captures: bestSteps.length,
-    steps: bestSteps,
+    captures: chosenSteps.length,
+    steps: chosenSteps,
     nodesVisited: budget.nodesVisited,
     timedOut: budget.timedOut,
   }
@@ -215,6 +229,80 @@ export function findAllStepMoves(board: FastBoard): CaptureStep[] {
   }
 
   return steps
+}
+
+/**
+ * Zwraca zwykłe kroki zbliżające pionek w stronę innego pionka oddalonego o 2 pola
+ * (np. gdy cel jest 1 pole w bok i 2 poniżej, dopuszcza ruch w dół lub po przekątnej w dół).
+ * W razie braku takich par spada do ruchów pionków mających sąsiada w promieniu 2 pól,
+ * a ostatecznie do wszystkich legalnych kroków.
+ */
+export function findApproachStepMoves(board: FastBoard): CaptureStep[] {
+  const approachSteps: CaptureStep[] = []
+  const nearbyPieceSteps: CaptureStep[] = []
+  const seenApproach = new Set<number>()
+
+  for (let idx = 0; idx < TOTAL_CELLS; idx++) {
+    if (board[idx] !== PIECE_CELL) continue
+
+    const row = Math.floor(idx / BOARD_SIZE)
+    const col = idx % BOARD_SIZE
+
+    const distance2Targets: { row: number; col: number }[] = []
+    let hasAnyNearbyPiece = false
+
+    const minRow = Math.max(0, row - 2)
+    const maxRow = Math.min(BOARD_SIZE - 1, row + 2)
+    const minCol = Math.max(0, col - 2)
+    const maxCol = Math.min(BOARD_SIZE - 1, col + 2)
+
+    for (let r = minRow; r <= maxRow; r++) {
+      for (let c = minCol; c <= maxCol; c++) {
+        const otherIdx = r * BOARD_SIZE + c
+        if (otherIdx === idx || board[otherIdx] !== PIECE_CELL) continue
+
+        hasAnyNearbyPiece = true
+        const dist = Math.max(Math.abs(r - row), Math.abs(c - col))
+        if (dist === 2) {
+          distance2Targets.push({ row: r, col: c })
+        }
+      }
+    }
+
+    if (!hasAnyNearbyPiece) continue
+
+    for (let d = 0; d < DIRECTIONS.length; d++) {
+      const [dr, dc] = DIRECTIONS[d]!
+      const toRow = row + dr
+      const toCol = col + dc
+
+      if (toRow < 0 || toRow >= BOARD_SIZE || toCol < 0 || toCol >= BOARD_SIZE) {
+        continue
+      }
+
+      const toIdx = toRow * BOARD_SIZE + toCol
+      if (board[toIdx] !== EMPTY_CELL) continue
+
+      const step: CaptureStep = { from: { row, col }, to: { row: toRow, col: toCol } }
+      nearbyPieceSteps.push(step)
+
+      const movesAdjacentToTarget = distance2Targets.some(
+        (target) => Math.max(Math.abs(target.row - toRow), Math.abs(target.col - toCol)) === 1,
+      )
+
+      if (movesAdjacentToTarget) {
+        const key = idx * TOTAL_CELLS + toIdx
+        if (!seenApproach.has(key)) {
+          seenApproach.add(key)
+          approachSteps.push(step)
+        }
+      }
+    }
+  }
+
+  if (approachSteps.length > 0) return approachSteps
+  if (nearbyPieceSteps.length > 0) return nearbyPieceSteps
+  return findAllStepMoves(board)
 }
 
 /**

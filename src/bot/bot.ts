@@ -4,7 +4,7 @@ import {
   applyStepsOnFastBoard,
   countPieces,
   createSearchBudget,
-  findAllStepMoves,
+  findApproachStepMoves,
   findBestCaptureSequence,
   findMove1Candidates,
   toFastBoard,
@@ -153,13 +153,14 @@ function planLookaheadTurn(state: GameState, options: BotOptions): BotTurnPlan {
 function planGreedyMoveTurn(state: GameState, options: BotOptions): BotTurnPlan {
   const budget = createSearchBudget(options.maxNodes, options.maxTimeMs)
   const board = toFastBoard(state.board)
+  const randomTieBreak = options.randomTieBreak ?? false
 
   // --- RUCH 1 ---
-  const move1Capture = findBestCaptureSequence(board, budget)
+  const move1Capture = findBestCaptureSequence(board, budget, randomTieBreak)
 
   if (move1Capture.captures > 0) {
     applyStepsOnFastBoard(board, move1Capture.steps)
-    const move2Capture = findBestCaptureSequence(board, budget)
+    const move2Capture = findBestCaptureSequence(board, budget, randomTieBreak)
 
     return {
       actions: buildTurnActions(
@@ -174,9 +175,14 @@ function planGreedyMoveTurn(state: GameState, options: BotOptions): BotTurnPlan 
     }
   }
 
-  // Brak bicia w 1. ruchu -> wykonujemy pierwszy dostępny zwykły krok i szukamy bicia w 2. ruchu
-  const stepMoves = findAllStepMoves(board)
-  const firstStep = stepMoves[0]
+  // Brak bicia w 1. ruchu -> zbliżamy się pionkiem do innego pionka w obrębie 2 kratek
+  const stepMoves = findApproachStepMoves(board)
+  const firstStep =
+    stepMoves.length === 0
+      ? undefined
+      : randomTieBreak && stepMoves.length > 1
+        ? stepMoves[Math.floor(Math.random() * stepMoves.length)]
+        : stepMoves[0]
 
   if (!firstStep) {
     return {
@@ -188,7 +194,7 @@ function planGreedyMoveTurn(state: GameState, options: BotOptions): BotTurnPlan 
   }
 
   applyStepsOnFastBoard(board, [firstStep])
-  const move2Capture = findBestCaptureSequence(board, budget)
+  const move2Capture = findBestCaptureSequence(board, budget, randomTieBreak)
 
   return {
     actions: buildTurnActions([firstStep], 0, move2Capture.steps, move2Capture.captures),
