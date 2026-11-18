@@ -413,13 +413,10 @@ async function dispatchAction(action: Action) {
     return
   }
 
-  console.log('dispatch action:', action)
-
+  const sessionAtStart = gameSessionId.value
   const stateBeforeAction = gameState.value
 
   const result = dispatch(stateBeforeAction, action)
-
-  console.log('dispatch result:', result)
 
   if (!result.ok) {
     showActionError(result.error)
@@ -451,6 +448,9 @@ async function dispatchAction(action: Action) {
   }
 
   await wait(MOVE_ANIMATION_MS)
+  if (sessionAtStart !== gameSessionId.value) {
+    return
+  }
 
   /*
    * 2. Jeśli było to bicie, zbity pionek
@@ -462,6 +462,9 @@ async function dispatchAction(action: Action) {
     const nextPileSlot = stateBeforeAction.scores[capturingPlayer] ?? 0
 
     await animateCapturedPiece(moveEvent, capturingPlayer, nextPileSlot)
+    if (sessionAtStart !== gameSessionId.value) {
+      return
+    }
   }
 
   /*
@@ -494,13 +497,23 @@ function handleRestart() {
   restartCurrentGame()
 }
 
+let announcementTimerId: number | null = null
+
+function clearAnnouncementTimer() {
+  if (announcementTimerId !== null) {
+    window.clearTimeout(announcementTimerId)
+    announcementTimerId = null
+  }
+}
+
 async function runBotTurn() {
   const runId = ++botRunId
+  const sessionAtStart = gameSessionId.value
 
-  while (runId === botRunId && isBotTurn.value) {
+  while (runId === botRunId && sessionAtStart === gameSessionId.value && isBotTurn.value) {
     await wait(350)
 
-    if (runId !== botRunId || !isBotTurn.value) {
+    if (runId !== botRunId || sessionAtStart !== gameSessionId.value || !isBotTurn.value) {
       return
     }
 
@@ -511,8 +524,7 @@ async function runBotTurn() {
           : simBotTwoStrategy.value
         : botStrategy.value
 
-    const useRandomTieBreak =
-      gameMode.value === 'simulation' ? simRandomTieBreak.value : true
+    const useRandomTieBreak = gameMode.value === 'simulation' ? simRandomTieBreak.value : true
 
     const plan = planBotTurn(gameState.value, {
       strategy: activeStrategy,
@@ -520,11 +532,16 @@ async function runBotTurn() {
     })
 
     for (const action of plan.actions) {
-      if (runId !== botRunId || !isBotTurn.value) {
+      if (runId !== botRunId || sessionAtStart !== gameSessionId.value || !isBotTurn.value) {
         return
       }
 
       await dispatchAction(action)
+
+      if (runId !== botRunId || sessionAtStart !== gameSessionId.value) {
+        return
+      }
+
       await wait(160)
     }
   }
@@ -532,6 +549,7 @@ async function runBotTurn() {
 
 watch(gameSessionId, () => {
   botRunId++
+  clearAnnouncementTimer()
   gameState.value = createInitialGameState(2)
   selectedPosition.value = null
   actionError.value = null
@@ -623,13 +641,17 @@ function updateGameAnnouncement(
   const turnEndedEvent = events.find((event) => event.type === 'turn-ended')
 
   if (turnEndedEvent) {
+    const sessionAtSchedule = gameSessionId.value
+    clearAnnouncementTimer()
+
     announcement.value = {
       type: 'ends-turn',
       player: stateBeforeAction.currentPlayer + 1,
     }
 
-    window.setTimeout(() => {
-      if (nextState.status.type === 'playing') {
+    announcementTimerId = window.setTimeout(() => {
+      announcementTimerId = null
+      if (sessionAtSchedule === gameSessionId.value && nextState.status.type === 'playing') {
         announcement.value = {
           type: 'starts-turn',
           player: nextState.currentPlayer + 1,
