@@ -19,3 +19,9 @@ export interface PieceMoveView {
   from: Position
   to: Position
 }
+
+export interface MoveTrailStepView {
+  from: Position
+  to: Position
+  over?: Position
+}

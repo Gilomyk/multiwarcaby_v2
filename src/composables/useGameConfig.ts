@@ -12,6 +12,7 @@ export const botPlayerIndex = ref<0 | 1 | null>(null)
 export const simBotOneStrategy = ref<BotStrategy>('greedy-move')
 export const simBotTwoStrategy = ref<BotStrategy>('lookahead-turn')
 export const simRandomTieBreak = ref(false)
+export const learningMode = ref(false)
 export const gameSessionId = ref(0)
 
 function resolveBotPlayerIndex(starter: BotStarter): 0 | 1 {
@@ -27,6 +28,7 @@ export function startNewGame(config: {
   simBot1Strategy?: BotStrategy
   simBot2Strategy?: BotStrategy
   simRandomTieBreak?: boolean
+  learningMode?: boolean
 }) {
   gameMode.value = config.mode
   botStrategy.value = config.strategy
@@ -41,6 +43,9 @@ export function startNewGame(config: {
   }
   if (config.simRandomTieBreak !== undefined) {
     simRandomTieBreak.value = config.simRandomTieBreak
+  }
+  if (config.learningMode !== undefined) {
+    learningMode.value = config.learningMode
   }
 
   gameSessionId.value++

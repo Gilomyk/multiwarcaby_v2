@@ -36,6 +36,44 @@
                   @click="(r, c) => emit('cell-click', r, c)"
                 />
               </template>
+
+              <svg
+                v-if="props.trailSteps && props.trailSteps.length > 0"
+                class="board-trail-overlay"
+                viewBox="0 0 900 900"
+                aria-hidden="true"
+              >
+                <g v-for="(step, idx) in props.trailSteps" :key="`trail-${idx}`">
+                  <line
+                    :x1="cellCenter(step.from.col)"
+                    :y1="cellCenter(step.from.row)"
+                    :x2="cellCenter(step.to.col)"
+                    :y2="cellCenter(step.to.row)"
+                    class="board-trail-line"
+                  />
+                  <polyline :points="chevronPoints(step)" class="board-trail-chevron" />
+                  <circle
+                    v-if="step.over"
+                    :cx="cellCenter(step.over.col)"
+                    :cy="cellCenter(step.over.row)"
+                    r="13"
+                    class="board-trail-capture-dot"
+                  />
+                </g>
+
+                <circle
+                  :cx="cellCenter(props.trailSteps[0]!.from.col)"
+                  :cy="cellCenter(props.trailSteps[0]!.from.row)"
+                  r="10"
+                  class="board-trail-endpoint"
+                />
+                <circle
+                  :cx="cellCenter(props.trailSteps[props.trailSteps.length - 1]!.to.col)"
+                  :cy="cellCenter(props.trailSteps[props.trailSteps.length - 1]!.to.row)"
+                  r="11"
+                  class="board-trail-endpoint"
+                />
+              </svg>
             </div>
           </div>
         </div>
@@ -63,7 +101,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BoardCell from '@/components/board/BoardCell.vue'
-import type { CellView, PieceMoveView } from '@/types/board-view'
+import type { CellView, MoveTrailStepView, PieceMoveView } from '@/types/board-view'
 
 const boardElement = ref<HTMLElement | null>(null)
 const fileLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
@@ -73,7 +111,41 @@ const props = defineProps<{
   board: CellView[][]
   movingPiece: PieceMoveView | null
   moveDurationMs: number
+  trailSteps?: readonly MoveTrailStepView[]
 }>()
+
+function cellCenter(index: number): number {
+  return index * 100 + 50
+}
+
+function chevronPoints(step: MoveTrailStepView): string {
+  const x1 = cellCenter(step.from.col)
+  const y1 = cellCenter(step.from.row)
+  const x2 = cellCenter(step.to.col)
+  const y2 = cellCenter(step.to.row)
+
+  const dx = x2 - x1
+  const dy = y2 - y1
+  const len = Math.hypot(dx, dy)
+  if (len === 0) return ''
+
+  const ux = dx / len
+  const uy = dy / len
+  const px = -uy
+  const py = ux
+
+  const mx = (x1 + x2) / 2
+  const my = (y1 + y2) / 2
+
+  const tipX = mx + ux * 15
+  const tipY = my + uy * 15
+  const leftX = mx - ux * 14 + px * 17
+  const leftY = my - uy * 14 + py * 17
+  const rightX = mx - ux * 14 - px * 17
+  const rightY = my - uy * 14 - py * 17
+
+  return `${leftX.toFixed(1)},${leftY.toFixed(1)} ${tipX.toFixed(1)},${tipY.toFixed(1)} ${rightX.toFixed(1)},${rightY.toFixed(1)}`
+}
 
 const emit = defineEmits<{
   (e: 'cell-click', row: number, col: number): void
@@ -203,6 +275,7 @@ defineExpose({
 }
 
 .game-board {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
@@ -210,6 +283,42 @@ defineExpose({
   width: min(72vw, 62vh, 620px);
 
   height: min(72vw, 62vh, 620px);
+}
+
+.board-trail-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.92;
+}
+
+.board-trail-line {
+  stroke: #16a34a;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.board-trail-chevron {
+  fill: none;
+  stroke: #16a34a;
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.board-trail-capture-dot {
+  fill: #0f172a;
+  stroke: #16a34a;
+  stroke-width: 4;
+}
+
+.board-trail-endpoint {
+  fill: #0f172a;
+  stroke: #16a34a;
+  stroke-width: 3;
 }
 
 @media (max-width: 900px) {

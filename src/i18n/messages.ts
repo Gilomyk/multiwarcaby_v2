@@ -76,6 +76,13 @@ export const messages = {
         random: 'Losowo',
       },
 
+      learning: {
+        title: 'Tryb uczenia',
+        description: 'Pokazuje zieloną ścieżkę ruchu, zbite pionki i zatrzymuje bota do zatwierdzenia.',
+        off: 'Wyłączony',
+        on: 'Włączony',
+      },
+
       cancel: 'Anuluj',
       start: 'Rozpocznij grę',
     },
@@ -105,6 +112,7 @@ export const messages = {
         turnStarted: 'Rozpoczynasz turę!',
         endSequence: 'Zakończ serię',
         endTurn: 'Zakończ turę',
+        confirmBotMove: 'Zatwierdź',
       },
 
       captured: {
@@ -232,6 +240,13 @@ export const messages = {
         random: 'Random',
       },
 
+      learning: {
+        title: 'Learning mode',
+        description: 'Shows green move trails, captured pieces, and pauses bot moves for confirmation.',
+        off: 'Off',
+        on: 'On',
+      },
+
       cancel: 'Cancel',
       start: 'Start game',
     },
@@ -261,6 +276,7 @@ export const messages = {
         turnStarted: 'Your turn!',
         endSequence: 'End sequence',
         endTurn: 'End turn',
+        confirmBotMove: 'Confirm',
       },
 
       captured: {

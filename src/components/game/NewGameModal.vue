@@ -230,6 +230,37 @@
             </div>
           </section>
         </template>
+
+        <section class="new-game-section">
+          <div class="new-game-section__heading">
+            <span class="new-game-section__icon">🧭</span>
+
+            <div>
+              <h3>{{ t.newGame.learning.title }}</h3>
+              <p>{{ t.newGame.learning.description }}</p>
+            </div>
+          </div>
+
+          <div class="new-game-options">
+            <button
+              type="button"
+              class="new-game-option"
+              :class="{ 'new-game-option--active': !selectedLearningMode }"
+              @click="selectedLearningMode = false"
+            >
+              {{ t.newGame.learning.off }}
+            </button>
+
+            <button
+              type="button"
+              class="new-game-option"
+              :class="{ 'new-game-option--active': selectedLearningMode }"
+              @click="selectedLearningMode = true"
+            >
+              {{ t.newGame.learning.on }}
+            </button>
+          </div>
+        </section>
       </div>
 
       <footer class="new-game-modal__footer">
@@ -248,6 +279,7 @@ import {
   botStarter,
   botStrategy,
   gameMode,
+  learningMode,
   simBotOneStrategy,
   simBotTwoStrategy,
   simRandomTieBreak,
@@ -267,6 +299,7 @@ const selectedStarter = ref<BotStarter>(botStarter.value)
 const selectedSimBot1 = ref<BotStrategy>(simBotOneStrategy.value)
 const selectedSimBot2 = ref<BotStrategy>(simBotTwoStrategy.value)
 const selectedSimRandomTieBreak = ref<boolean>(simRandomTieBreak.value)
+const selectedLearningMode = ref<boolean>(learningMode.value)
 
 function handleStart() {
   startNewGame({
@@ -276,6 +309,7 @@ function handleStart() {
     simBot1Strategy: selectedSimBot1.value,
     simBot2Strategy: selectedSimBot2.value,
     simRandomTieBreak: selectedSimRandomTieBreak.value,
+    learningMode: selectedLearningMode.value,
   })
   emit('close')
 }

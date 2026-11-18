@@ -4,7 +4,7 @@
     :from="flyingCapture.from"
     :to="flyingCapture.to"
     :target-size="flyingCapture.targetSize"
-    :duration-ms="CAPTURE_ANIMATION_MS"
+    :duration-ms="activeCaptureDurationMs"
   />
   <div class="game-view">
     <AppHeader />
@@ -27,7 +27,8 @@
               ref="boardComponent"
               :board="board"
               :moving-piece="movingPiece"
-              :move-duration-ms="MOVE_ANIMATION_MS"
+              :move-duration-ms="activeMoveDurationMs"
+              :trail-steps="moveTrail"
               @cell-click="handleCellClick"
             />
 
@@ -41,7 +42,11 @@
 
           <div class="game-action-area">
             <div class="game-controls">
-              <span v-if="isBotTurn" class="game-controls__message">
+              <AppButton v-if="waitingForBotConfirm" variant="primary" @click="handleConfirmBotMove">
+                {{ t.game.controls.confirmBotMove }}
+              </AppButton>
+
+              <span v-else-if="isBotTurn" class="game-controls__message">
                 {{ botThinkingLabel }}
               </span>
 
@@ -112,6 +117,7 @@ import {
   botStrategy,
   gameMode,
   gameSessionId,
+  learningMode,
   playerNames,
   restartCurrentGame,
   simBotOneStrategy,
@@ -124,7 +130,7 @@ import { createInitialGameState, dispatch } from '@/engine/game'
 
 import type { Action, ActionError, GameState, Position, GameEvent } from '@/engine/types'
 
-import type { CellView, PieceMoveView, PieceView } from '@/types/board-view'
+import type { CellView, MoveTrailStepView, PieceMoveView, PieceView } from '@/types/board-view'
 
 // Types
 
@@ -168,6 +174,13 @@ const movingPiece = ref<PieceMoveView | null>(null)
 const isAnimating = ref(false)
 
 const MOVE_ANIMATION_MS = 180
+const LEARNING_BOT_MOVE_ANIMATION_MS = 340
+const CAPTURE_ANIMATION_MS = 280
+const LEARNING_BOT_CAPTURE_ANIMATION_MS = 360
+
+const moveTrail = ref<MoveTrailStepView[]>([])
+const waitingForBotConfirm = ref(false)
+let botConfirmResolver: (() => void) | null = null
 
 // captured piece animation
 
@@ -180,7 +193,13 @@ const flyingCapture = ref<FlyingCapture | null>(null)
 
 const hiddenCapturedPosition = ref<Position | null>(null)
 
-const CAPTURE_ANIMATION_MS = 280
+const activeMoveDurationMs = computed(() =>
+  isBotTurn.value && learningMode.value ? LEARNING_BOT_MOVE_ANIMATION_MS : MOVE_ANIMATION_MS,
+)
+
+const activeCaptureDurationMs = computed(() =>
+  isBotTurn.value && learningMode.value ? LEARNING_BOT_CAPTURE_ANIMATION_MS : CAPTURE_ANIMATION_MS,
+)
 
 // Error handling
 
@@ -430,6 +449,10 @@ async function dispatchAction(action: Action) {
   if (!moveEvent) {
     gameState.value = result.state
 
+    if (learningMode.value) {
+      moveTrail.value = []
+    }
+
     updateGameAnnouncement(stateBeforeAction, result.state, result.events)
 
     selectedPosition.value = result.state.turn.sequencePiece
@@ -447,7 +470,7 @@ async function dispatchAction(action: Action) {
     to: moveEvent.to,
   }
 
-  await wait(MOVE_ANIMATION_MS)
+  await wait(activeMoveDurationMs.value)
   if (sessionAtStart !== gameSessionId.value) {
     return
   }
@@ -475,6 +498,18 @@ async function dispatchAction(action: Action) {
    * w docelowym slocie stosu.
    */
   gameState.value = result.state
+
+  if (learningMode.value) {
+    const trailStep: MoveTrailStepView =
+      moveEvent.type === 'capture'
+        ? { from: moveEvent.from, to: moveEvent.to, over: moveEvent.over }
+        : { from: moveEvent.from, to: moveEvent.to }
+
+    moveTrail.value =
+      stateBeforeAction.turn.sequencePiece !== null ? [...moveTrail.value, trailStep] : [trailStep]
+  } else {
+    moveTrail.value = []
+  }
 
   updateGameAnnouncement(stateBeforeAction, result.state, result.events)
 
@@ -504,6 +539,28 @@ function clearAnnouncementTimer() {
     window.clearTimeout(announcementTimerId)
     announcementTimerId = null
   }
+}
+
+function cancelBotConfirm() {
+  waitingForBotConfirm.value = false
+  if (botConfirmResolver !== null) {
+    const resolve = botConfirmResolver
+    botConfirmResolver = null
+    resolve()
+  }
+}
+
+function handleConfirmBotMove() {
+  cancelBotConfirm()
+}
+
+function waitForBotConfirm(runId: number, sessionAtStart: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    waitingForBotConfirm.value = true
+    botConfirmResolver = () => {
+      resolve(runId === botRunId && sessionAtStart === gameSessionId.value)
+    }
+  })
 }
 
 async function runBotTurn() {
@@ -536,20 +593,42 @@ async function runBotTurn() {
         return
       }
 
+      if (learningMode.value && (action.type === 'endSequence' || action.type === 'endTurn')) {
+        const confirmed = await waitForBotConfirm(runId, sessionAtStart)
+        if (!confirmed || !isBotTurn.value) {
+          return
+        }
+        moveTrail.value = []
+      }
+
       await dispatchAction(action)
 
       if (runId !== botRunId || sessionAtStart !== gameSessionId.value) {
         return
       }
 
-      await wait(160)
+      if (
+        learningMode.value &&
+        action.type === 'move' &&
+        gameState.value.turn.sequencePiece === null
+      ) {
+        const confirmed = await waitForBotConfirm(runId, sessionAtStart)
+        if (!confirmed) {
+          return
+        }
+        moveTrail.value = []
+      }
+
+      await wait(learningMode.value ? 180 : 160)
     }
   }
 }
 
 watch(gameSessionId, () => {
   botRunId++
+  cancelBotConfirm()
   clearAnnouncementTimer()
+  moveTrail.value = []
   gameState.value = createInitialGameState(2)
   selectedPosition.value = null
   actionError.value = null
@@ -609,7 +688,7 @@ async function animateCapturedPiece(
     targetSize: target.size,
   }
 
-  await wait(CAPTURE_ANIMATION_MS)
+  await wait(activeCaptureDurationMs.value)
 }
 
 function showActionError(error: ActionError) {
