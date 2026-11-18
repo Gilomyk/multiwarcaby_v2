@@ -110,6 +110,44 @@ describe('planBotTurn (greedy-move / Wersja 1)', () => {
     expect(nextState.currentPlayer).toBe(1)
     expect(nextState.scores[0]).toBe(2)
   })
+
+  it('gdy brak bicia w 1. ruchu, zbliża pionek w stronę innego pionka w obrębie 2 kratek zamiast ruszać odizolowany pionek', () => {
+    const board = createEmptyBoard()
+    // Odizolowany pionek w lewym górnym rogu (normalnie pierwszy w kolejności skanowania)
+    board[0]![0] = 'piece'
+    // Para pionków w odległości 2 wiersze w dół i 1 kolumnę w bok: (4,2) oraz (6,3)
+    board[4]![2] = 'piece'
+    board[6]![3] = 'piece'
+
+    const state = createStateWithBoard(board)
+    const plan = planBotTurn(state, { strategy: 'greedy-move', randomTieBreak: false })
+
+    // Zbliżenie pionka (4,2) w stronę (6,3) (w dół na (5,2) lub po przekątnej na (5,3)) otwiera bicie w 2. ruchu!
+    expect(plan.expectedCaptures).toBe(1)
+    const firstAction = plan.actions[0]
+    expect(firstAction?.type).toBe('move')
+    if (firstAction?.type === 'move') {
+      expect(firstAction.from).not.toEqual({ row: 0, col: 0 })
+    }
+
+    const nextState = applyPlan(state, plan.actions)
+    expect(nextState.scores[0]).toBe(1)
+  })
+
+  it('z opcją randomTieBreak potrafi wybrać różne równie dobre otwarcia', () => {
+    const state = createInitialGameState(2)
+    const seenFirstMoves = new Set<string>()
+
+    for (let i = 0; i < 30; i++) {
+      const plan = planBotTurn(state, { strategy: 'greedy-move', randomTieBreak: true })
+      const firstAction = plan.actions[0]
+      if (firstAction?.type === 'move') {
+        seenFirstMoves.add(`${firstAction.from.row},${firstAction.from.col}->${firstAction.to.row},${firstAction.to.col}`)
+      }
+    }
+
+    expect(seenFirstMoves.size).toBeGreaterThan(1)
+  })
 })
 
 describe('planBotTurn (lookahead-turn / Wersja 2)', () => {
