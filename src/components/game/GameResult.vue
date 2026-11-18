@@ -15,7 +15,16 @@
         :class="['game-result__score', winner === playerIndex - 1 && 'game-result__score--winner']"
       >
         <span>{{ playerNames?.[playerIndex - 1] ?? t.game.player(playerIndex) }}</span>
-        <strong>{{ scores[playerIndex - 1] ?? 0 }}</strong>
+
+        <div class="game-result__score-metrics">
+          <span
+            class="game-result__score-max"
+            :title="t.game.status.maxSequenceTitle(maxSequenceCaptures?.[playerIndex - 1] ?? 0)"
+          >
+            {{ t.game.status.maxSequence(maxSequenceCaptures?.[playerIndex - 1] ?? 0) }}
+          </span>
+          <strong>{{ scores[playerIndex - 1] ?? 0 }}</strong>
+        </div>
       </div>
     </div>
 
@@ -35,6 +44,7 @@ const props = defineProps<{
   playerCount: 2 | 3 | 4
   scores: readonly number[]
   playerNames?: readonly string[]
+  maxSequenceCaptures?: readonly number[]
 }>()
 
 const emit = defineEmits<{
@@ -90,10 +100,25 @@ const resultLabel = computed(() => {
 .game-result__score {
   display: flex;
   justify-content: space-between;
-  gap: var(--space-6);
+  align-items: center;
+  gap: var(--space-4);
   padding: 2px var(--space-1);
   border-radius: var(--radius-sm);
   color: var(--color-text-light);
+}
+
+.game-result__score-metrics {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.game-result__score-max {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .game-result__score--winner {

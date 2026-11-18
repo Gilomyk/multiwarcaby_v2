@@ -81,6 +81,8 @@
               :moves-used="gameState.turn.movesUsed"
               :is-sequence-active="gameState.turn.sequencePiece !== null"
               :player-names="playerNames"
+              :current-sequence-captures="currentSequenceCaptures"
+              :max-sequence-captures="maxSequenceCaptures"
             />
 
             <GameResult
@@ -89,6 +91,7 @@
               :player-count="gameState.playerCount"
               :scores="gameState.scores"
               :player-names="playerNames"
+              :max-sequence-captures="maxSequenceCaptures"
               @restart="handleRestart"
             />
           </div>
@@ -179,6 +182,8 @@ const CAPTURE_ANIMATION_MS = 280
 const LEARNING_BOT_CAPTURE_ANIMATION_MS = 360
 
 const moveTrail = ref<MoveTrailStepView[]>([])
+const currentSequenceCaptures = ref(0)
+const maxSequenceCaptures = ref<number[]>([0, 0])
 const waitingForBotConfirm = ref(false)
 let botConfirmResolver: (() => void) | null = null
 
@@ -448,6 +453,7 @@ async function dispatchAction(action: Action) {
 
   if (!moveEvent) {
     gameState.value = result.state
+    currentSequenceCaptures.value = 0
 
     if (learningMode.value) {
       moveTrail.value = []
@@ -498,6 +504,18 @@ async function dispatchAction(action: Action) {
    * w docelowym slocie stosu.
    */
   gameState.value = result.state
+
+  if (moveEvent.type === 'capture') {
+    const capturingPlayer = stateBeforeAction.currentPlayer
+    const nextSeq = (stateBeforeAction.turn.sequencePiece !== null ? currentSequenceCaptures.value : 0) + 1
+    currentSequenceCaptures.value = nextSeq
+
+    const nextMax = [...maxSequenceCaptures.value]
+    nextMax[capturingPlayer] = Math.max(nextMax[capturingPlayer] ?? 0, nextSeq)
+    maxSequenceCaptures.value = nextMax
+  } else {
+    currentSequenceCaptures.value = 0
+  }
 
   if (learningMode.value) {
     const trailStep: MoveTrailStepView =
@@ -629,6 +647,8 @@ watch(gameSessionId, () => {
   cancelBotConfirm()
   clearAnnouncementTimer()
   moveTrail.value = []
+  currentSequenceCaptures.value = 0
+  maxSequenceCaptures.value = [0, 0]
   gameState.value = createInitialGameState(2)
   selectedPosition.value = null
   actionError.value = null

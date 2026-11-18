@@ -106,6 +106,9 @@ export const messages = {
         move: (move: number) => `Ruch ${move} / 2`,
 
         captureSequenceActive: 'Seria bić aktywna',
+        sequenceCount: (count: number) => `Seria: ${count}`,
+        maxSequence: (count: number) => `max: ${count}`,
+        maxSequenceTitle: (count: number) => `Najdłuższa seria bić w grze: ${count}`,
       },
 
       controls: {
@@ -270,6 +273,9 @@ export const messages = {
         move: (move: number) => `Move ${move} / 2`,
 
         captureSequenceActive: 'Capture sequence active',
+        sequenceCount: (count: number) => `Streak: ${count}`,
+        maxSequence: (count: number) => `max: ${count}`,
+        maxSequenceTitle: (count: number) => `Longest capture sequence in game: ${count}`,
       },
 
       controls: {

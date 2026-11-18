@@ -17,6 +17,13 @@
           :class="{ 'game-status__sequence-indicator--active': isSequenceActive }"
           :title="isSequenceActive ? t.game.status.captureSequenceActive : undefined"
         />
+
+        <span
+          v-if="isSequenceActive && (currentSequenceCaptures ?? 0) > 0"
+          class="game-status__sequence-badge"
+        >
+          {{ t.game.status.sequenceCount(currentSequenceCaptures!) }}
+        </span>
       </div>
     </div>
 
@@ -31,12 +38,23 @@
           playerIndex - 1 === currentPlayer && 'game-status__score--active',
         ]"
       >
-        <span>{{ playerNames?.[playerIndex - 1] ?? t.game.player(playerIndex) }}</span>
+        <span class="game-status__score-name">{{
+          playerNames?.[playerIndex - 1] ?? t.game.player(playerIndex)
+        }}</span>
 
-        <strong class="game-status__score-value">
-          <span class="game-status__piece-dot" aria-hidden="true" />
-          {{ scores[playerIndex - 1] ?? 0 }}
-        </strong>
+        <div class="game-status__score-metrics">
+          <span
+            class="game-status__score-max"
+            :title="t.game.status.maxSequenceTitle(maxSequenceCaptures?.[playerIndex - 1] ?? 0)"
+          >
+            {{ t.game.status.maxSequence(maxSequenceCaptures?.[playerIndex - 1] ?? 0) }}
+          </span>
+
+          <strong class="game-status__score-value">
+            <span class="game-status__piece-dot" aria-hidden="true" />
+            {{ scores[playerIndex - 1] ?? 0 }}
+          </strong>
+        </div>
       </div>
     </div>
   </aside>
@@ -53,6 +71,8 @@ const props = defineProps<{
   movesUsed: 0 | 1 | 2
   isSequenceActive: boolean
   playerNames?: readonly string[]
+  currentSequenceCaptures?: number
+  maxSequenceCaptures?: readonly number[]
 }>()
 
 const moveLabel = computed(() => {
@@ -95,6 +115,38 @@ const moveLabel = computed(() => {
 .game-status__player {
   color: var(--color-status-text);
   font-size: 1.1rem;
+}
+
+.game-status__sequence-badge {
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-piece-gold-highlight);
+  color: #1c1a2e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.game-status__score-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-status__score-metrics {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.game-status__score-max {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .game-status__score-value {
