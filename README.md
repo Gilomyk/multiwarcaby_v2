@@ -34,8 +34,11 @@ Pełna i nadrzędna specyfikacja zasad znajduje się w pliku [`RULES.md`](./RULE
   - **Łatwy (`greedy-move`)** — maksymalizuje liczbę bić w pojedynczym ruchu,
   - **Trudny (`lookahead-turn`)** — analizuje kombinacje 2 ruchów w ramach tury,
   - wybór strony rozpoczynającej (Gracz / Bot / Losowo),
+- tryb symulacji **Bot vs Bot** (z wyborem strategii dla obu botów oraz trybu wyboru równie dobrych ruchów: deterministycznego / losowego),
+- **Tryb uczenia** dostępny we wszystkich trybach gry (zielona ścieżka ruchu ze strzałkami kierunkowymi, kropki na polach zbitych pionków, spowolniona animacja bota oraz przycisk **„Zatwierdź”** po każdym ruchu/serii),
 - ruchy i bicia w 8 kierunkach, serie bić, dwa ruchy na turę oraz możliwość wcześniejszego zakończenia tury,
-- naliczanie punktów, wykrywanie końca gry, remis i zwycięstwo,
+- naliczanie punktów, indykatory bieżącej serii bić (`Seria: X`) oraz najdłuższej serii w grze (`max: X`),
+- wykrywanie końca gry, remis i zwycięstwo,
 - animacje ruchów, animacje zbitych pionków oraz stosy zbitych pionków,
 - komunikaty o aktualnym przebiegu tury,
 - dwujęzyczny interfejs (**PL / EN**) oraz motywy (**Jasny / Ciemny / System**),
@@ -104,6 +107,9 @@ src/
 ├── views/          # główne widoki aplikacji
 └── App.vue
 
+scripts/
+└── simulate.ts     # headless benchmark / symulacje Bot vs Bot
+
 RULES.md            # nadrzędna specyfikacja zasad
 ```
 
@@ -169,6 +175,15 @@ Formatowanie:
 
 ```bash
 npm run format
+```
+
+### Symulacje headless (benchmark botów)
+
+Uruchomienie serii gier Bot vs Bot w terminalu (bez UI i animacji, domyślnie 100 gier na parę w trybie losowym + 1 gra deterministyczna):
+
+```bash
+npm run simulate
+npm run simulate -- --games=1000
 ```
 
 ---
